@@ -1879,6 +1879,18 @@ namespace aspect
       mutable TimerOutput                 computing_timer;
 
       /**
+       * A timer used to track the current wall time since the
+       * last snapshot (or since the program started).
+       */
+      Timer wall_timer;
+
+      /**
+       * The total wall time that has elapsed up to the last snapshot
+       * that was created.
+       */
+      double total_walltime_until_last_snapshot;
+
+      /**
        * In output_statistics(), where we output the statistics object above,
        * we do the actual writing on a separate thread. This variable is the
        * handle we get for this thread so that we can wait for it to finish,
@@ -1886,6 +1898,7 @@ namespace aspect
        * or if we want to terminate altogether.
        */
       std::thread                         output_statistics_thread;
+
       /**
        * @}
        */

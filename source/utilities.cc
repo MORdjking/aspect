@@ -1073,7 +1073,7 @@ namespace aspect
               urlString << "# POINTS:";
               for (unsigned int i = 0; i < points.size(); i++)
                 {
-                  urlString << " " << points[i];
+                  urlString << ' ' << points[i];
                 }
               urlString << "\n";
 
@@ -1086,7 +1086,7 @@ namespace aspect
                   for (unsigned int j = 0; j < columns.size(); j++)
                     {
                       urlString << columns[j][i];
-                      urlString << " ";
+                      urlString << ' ';
                     }
                   urlString << "\n";
                 }
@@ -2157,6 +2157,16 @@ namespace aspect
       return coordinates;
     }
 
+
+
+    template <int dim>
+    const std::array<double,dim> &NaturalCoordinate<dim>::get_coordinates() const
+    {
+      return coordinates;
+    }
+
+
+
     template <>
     std::array<double,1> NaturalCoordinate<2>::get_surface_coordinates() const
     {
@@ -2404,7 +2414,7 @@ namespace aspect
 
                   unsigned int j=0;
                   for (const auto &residual: solver_control.get_history_data())
-                    f << j++ << " " << residual << std::endl;
+                    f << j++ << ' ' << residual << std::endl;
                 }
 
               f.close();

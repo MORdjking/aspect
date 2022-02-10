@@ -567,6 +567,18 @@ namespace aspect
 
       bool print_details;
 
+      /**
+       * If true, it will time the key components of this matrix-free implementation, such as
+       * vmult of different matrices, solver IDR with the cheap preconditioner, etc.
+       */
+      bool do_timings;
+
+      /**
+       * The max/min of the evaluated viscosities.
+       */
+      double minimum_viscosity;
+      double maximum_viscosity;
+
       DoFHandler<dim> dof_handler_v;
       DoFHandler<dim> dof_handler_p;
       DoFHandler<dim> dof_handler_projection;
