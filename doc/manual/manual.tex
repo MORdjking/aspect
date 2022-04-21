@@ -2685,6 +2685,7 @@ so we get
 More details on the implementation can be found in \cite{dannberg_melt}. A benchmark case demonstrating the propagation of solitary waves can be found in Section~\ref{sec:benchmark-solitary_wave}.
 
 \subsection{Nullspace removal}
+\label{sec:nullspace}
 
 The Stokes equation (\ref{eq:stokes-1}) only involves symmetric gradients of the velocity, and as such
 the velocity is determined only up to rigid-body motions (that is to say, translations and rotations).
@@ -4862,195 +4863,8 @@ computed at the end of each time step -- affects what you get.}
 
 \input{cookbooks/convection-box/doc/convection-box.tex}
 
-\subsubsection{Convection in a 3d box}
-\label{sec:cookbooks-simple-box-3d}
-
-The world is not two-dimensional. While the previous section introduced a number
-of the knobs one can play with with \aspect{}, things only really become
-interesting once one goes to 3d. The setup from the previous section is easily
-adjusted to this and in the following, let us walk through some of the changes
-we have to consider when going from 2d to 3d. The full input file that
-contains these modifications and that was used for the simulations we will show
-subsequently can be found at \url{cookbooks/convection\_box\_3d.prm}.
-
-The first set of changes has to do with the geometry: it is three-dimensional,
-and we will have to address the fact that a box in 3d has 6 sides, not the 4 we
-had previously. The documentation of the ``box'' geometry
-(see Section~\ref{parameters:Geometry_20model}) states that these sides are
-numbered as follows: ``\textit{in 3d, boundary indicators 0 through 5 indicate
-left, right, front, back, bottom and top boundaries}.'' Recalling that we want
-tangential flow all around and want to fix the temperature to known values at
-the bottom and top, the following will make sense:
-\lstinputlisting[language=prmfile]{cookbooks/convection_box_3d/doc/start.part.prm.out}
-
-
-The next step is to describe the initial conditions. As before, we will use an
-unstably layered medium but the perturbation now needs to be both in $x$- and
-$y$-direction
-\lstinputlisting[language=prmfile]{cookbooks/convection_box_3d/doc/initial.part.prm.out}
-
-The third issue we need to address is that we can likely not afford a mesh as
-fine as in 2d. We choose a mesh that is refined 3 times globally at the
-beginning, then 3 times adaptively, and is then adapted every 15 time steps. We
-also allow one additional mesh refinement in the first time step following
-$t=0.003$ once the initial instability has given way to a more stable pattern:
-\lstinputlisting[language=prmfile]{cookbooks/convection_box_3d/doc/amr.part.prm.out}
-
-Finally, as we have seen in the previous section, a computation with $Ra=10^4$
-does not lead to a simulation that is exactly exciting. Let us choose $Ra=10^6$
-instead (the mesh chosen above with up to 7 refinement levels after some time
-is fine enough to resolve this). We can achieve this in the same way as in the
-previous section by choosing $\alpha=10^{-10}$ and setting
-\lstinputlisting[language=prmfile]{cookbooks/convection_box_3d/doc/gravity.part.prm.out}
-This has some interesting implications. First, a higher Rayleigh number makes
-time scales correspondingly smaller; where we generated graphical output only
-once every 0.01 time units before, we now need to choose the corresponding
-increment smaller by a factor of 100:
-\lstinputlisting[language=prmfile]{cookbooks/convection_box_3d/doc/postprocess.part.prm.out}
-Secondly, a simulation like this -- in 3d, with a significant number of cells,
-and for a significant number of time steps -- will likely take a good amount of
-time. The computations for which we show results below was run using 64
-processors by running it using the command
-{\tt{mpirun -n 64 ./aspect convection\_box\_3d.prm}}. If the machine should crash
-during such a run, a significant amount of compute time would be lost if we had
-to run everything from the start. However, we can avoid this by periodically
-checkpointing the state of the computation:
-\lstinputlisting[language=prmfile]{cookbooks/convection_box_3d/doc/checkpoint.part.prm.out}
-If the computation does crash (or if a computation runs out of the time limit
-imposed by a scheduling system), then it can be restarted from such
-checkpointing files (see the parameter {\tt Resume computation}
-in Section~\ref{parameters:global}).
-\index[prmindex]{Resume computation}
-\index[prmindexfull]{Resume computation}
-
-Running with this input file requires a bit of patience%
-\footnote{For computations of this size, one should test a few time steps in
-  debug mode but then, of course, switch to running the actual computation in
-  optimized mode -- see Section~\ref{sec:debug-mode}.}
-since the number of
-degrees of freedom is just so large: it starts with a bit over 330,000\ldots
-\begin{lstlisting}[frame=single,language=ksh]
-Running with 64 MPI tasks.
-Number of active cells: 512 (on 4 levels)
-Number of degrees of freedom: 20,381 (14,739+729+4,913)
-
-*** Timestep 0:  t=0 seconds
-   Solving temperature system... 0 iterations.
-   Rebuilding Stokes preconditioner...
-   Solving Stokes system... 18 iterations.
-
-Number of active cells: 1,576 (on 5 levels)
-Number of degrees of freedom: 63,391 (45,909+2,179+15,303)
-
-*** Timestep 0:  t=0 seconds
-   Solving temperature system... 0 iterations.
-   Rebuilding Stokes preconditioner...
-   Solving Stokes system... 19 iterations.
-
-Number of active cells: 3,249 (on 5 levels)
-Number of degrees of freedom: 122,066 (88,500+4,066+29,500)
-
-*** Timestep 0:  t=0 seconds
-   Solving temperature system... 0 iterations.
-   Rebuilding Stokes preconditioner...
-   Solving Stokes system... 20 iterations.
-
-Number of active cells: 8,968 (on 5 levels)
-Number of degrees of freedom: 331,696 (240,624+10,864+80,208)
-
-*** Timestep 0:  t=0 seconds
-   Solving temperature system... 0 iterations.
-   Rebuilding Stokes preconditioner...
-   Solving Stokes system... 21 iterations.
-[...]
-\end{lstlisting}
-\ldots{}but then increases quickly to around 2 million as the solution develops
-some structure and, after time $t=0.003$ where we allow for an additional
-refinement, increases to over 10 million where it then hovers between 8 and 14
-million with a maximum of 15,147,534. Clearly, even on a reasonably quick
-machine, this will take some time: running this on a machine bought in 2011,
-doing the 10,000 time steps to get to $t=0.0219$ takes approximately 484,000
-seconds (about five and a half days).
-
-The structure or the solution is easiest to grasp by looking at isosurfaces of
-the temperature. This is shown in Fig.~\ref{fig:box-3d-solution} and you can
-find a movie of the motion that ensues from the heating at the bottom at
-\url{http://www.youtube.com/watch?v=_bKqU_P4j48}. The simulation uses adaptively
-changing meshes that are fine in rising plumes and sinking blobs and are coarse
-where nothing much happens. This is most easily seen in the movie at
-\url{http://www.youtube.com/watch?v=CzCKYyR-cmg}. Fig.~\ref{fig:box-3d-mesh}
-shows some of these meshes, though still pictures do not do the evolving nature
-of the mesh much justice. The effect of increasing the Rayleigh number is
-apparent when comparing the size of features with, for example, the picture at
-the right of Fig.~\ref{fig:convection-box-fields}. In contrast to that picture,
-the simulation is also clearly non-stationary.
-
-\begin{figure}
-  \centering
-  \includegraphics[width=0.3\textwidth]{cookbooks/convection_box_3d/doc/movie0010.png}
-  \hfill
-  \includegraphics[width=0.3\textwidth]{cookbooks/convection_box_3d/doc/movie0040.png}
-  \hfill
-  \includegraphics[width=0.3\textwidth]{cookbooks/convection_box_3d/doc/movie0060.png}
-  \\
-  \includegraphics[width=0.3\textwidth]{cookbooks/convection_box_3d/doc/movie0100.png}
-  \hfill
-  \includegraphics[width=0.3\textwidth]{cookbooks/convection_box_3d/doc/movie0130.png}
-  \hfill
-  \includegraphics[width=0.3\textwidth]{cookbooks/convection_box_3d/doc/movie0180.png}
-  \caption{\it Convection in a 3d box: Temperature isocontours and some
-  velocity vectors at the first time step after times $t=0.001, 0.004, 0.006$
-  (top row, left to right) an $t=0.01, 0.013, 0.018$ (bottom row).}
-  \label{fig:box-3d-solution}
-\end{figure}
-
-
-\begin{figure}
-  \centering
-  \includegraphics[width=0.3\textwidth]{cookbooks/convection_box_3d/doc/mesh0060.png}
-  \hfill
-  \includegraphics[width=0.3\textwidth]{cookbooks/convection_box_3d/doc/mesh0100.png}
-  \hfill
-  \includegraphics[width=0.3\textwidth]{cookbooks/convection_box_3d/doc/mesh0180.png}
-  \caption{\it Convection in a 3d box: Meshes and large-scale velocity field
-  for the third, fourth and sixth of the snapshots shown in
-  Fig.~\ref{fig:box-3d-solution}.}
-  \label{fig:box-3d-mesh}
-\end{figure}
-
-As before, we could analyze all sorts of data from the statistics file but we
-will leave this to those interested in specific data. Rather,
-Fig.~\ref{fig:box-3d-heat-flux} only shows the upward heat flux through the
-bottom and top boundaries of the domain as a function of time.%
-\footnote{Note that the statistics file actually contains the \textit{outward}
-heat flux for each of the six boundaries, which corresponds to the
-\textit{negative} of upward flux for the bottom boundary. The figure therefore
-shows the negative of the values available in the statistics file.}
-The figure reinforces a pattern that can also be seen by watching the movie of
-the temperature field referenced above, namely that the simulation can be
-subdivided into three distinct phases. The first phase corresponds to the
-initial overturning of the unstable layering of the temperature field and is
-associated with a large spike in heat flux as well as large velocities (not
-shown here). The second phase, until approximately $t=0.01$ corresponds to a
-relative lull: some plumes rise up, but not very fast because the medium is now
-stably layered but not fully mixed. This can be seen in the relatively low heat
-fluxes, but also in the fact that there are almost horizontal temperature
-isosurfaces in the second of the pictures in Fig.~\ref{fig:box-3d-solution}.
-After that, the general structure of the temperature field is that the interior
-of the domain is well mixed with a mostly constant average temperature and thin
-thermal boundary layers at the top and bottom from which plumes rise and sink.
-In this regime, the average heat flux is larger but also more variable depending
-on the number of plumes currently active. Many other analyses would be possible
-by using what is in the statistics file or by enabling additional
-postprocessors.
-
-\begin{figure}
-  \centering
-  \includegraphics[width=0.6\textwidth]{cookbooks/convection_box_3d/doc/heat-flux.png}
-  \caption{\it Convection in a 3d box: Upward heat flux through the bottom and
-  top boundaries as a function of time.}
-  \label{fig:box-3d-heat-flux}
-\end{figure}
+% cookbooks/convection_box_3d
+\input{cookbooks/convection_box_3d/doc/convection_box_3d.tex}
 
 \subsubsection{Convection in a box with prescribed, variable velocity boundary conditions}
 \label{sec:cookbooks-platelike}
@@ -5722,168 +5536,11 @@ Figure~\ref{fig:smoothing}.
 \end{figure}
 
 
+% cookbooks/finite_strain/
+\input{cookbooks/finite_strain/doc/finite_strain.tex}
 
-\subsubsection{Tracking finite strain}
-\label{sec:finite-strain}
-\textit{This section was contributed by Juliane Dannberg and Rene Gassm\"{o}ller}
-
-\note{In this section, following \cite{Becker2003, dahlen1998theoretical}, we denote the velocity gradient tensor as $\mathbf G$, where $\mathbf G = \nabla \mathbf u^T$,
-and $\mathbf u$ is the velocity. Note that this is different from the definition of the strain rate $\epsilon(\mathbf u)$, which only contains the symmetric part of $\mathbf G$. We then denote the deformation gradient (or deformation) tensor by $\mathbf F$, where $\mathbf F$ is the tensor that
-deforms an initial state $\mathbf x$ into an deformed state $\mathbf r = \mathbf F \mathbf x$.}
-
-In many geophysical settings, material properties, and in particular the rheology, do not only depend
-on the current temperature, pressure and strain rate, but also on the history of the system.
-This can be incorporated in \aspect{} models by tracking history variables through compositional fields.
-In this cookbook, we will show how to do this by tracking the strain that idealized little grains of finite size accumulate over time at every
-(Lagrangian) point in the model.
-
-Here, we use a material model plugin that defines the compositional fields as the components of the deformation
-gradient tensor $\mathbf F_{ij}$, and modifies the right-hand side of
-the corresponding advection equations to accumulate strain over time. This is done by adjusting the
-\verb!out.reaction_terms! variable:
-\lstinputlisting[language=C++]{cookbooks/finite_strain/finite_strain.cc}
-
-Let us denote the accumulated deformation at time step $n$ as $\mathbf F^n$. We can calculate its time derivative
-as the product of two tensors, namely the current velocity gradient $\mathbf G_{ij} = \frac{\partial u_i}{\partial x_j}$ and the deformation gradient $\mathbf F^{n-1}$ accumulated up to the previous time step, in other words $\frac{\partial \mathbf F}{\partial t} = \mathbf G \mathbf F$, and $\mathbf F^0 = \mathbf I$, with $\mathbf I$ being the identity tensor.
-While we refer to other studies \cite{McKenzie1983, dahlen1998theoretical, Becker2003} for a derivation of
-this relationship, we can give an intuitive example for the necessity to apply the velocity gradient to the already accumulated deformation, instead of simply integrating the velocity gradient over time. Consider a simple one-dimensional ``grain'' of length $1.0$, in which case the deformation tensor only has one component, the compression in $x$-direction. If one embeds this grain into a convergent flow field for a compressible medium where the dimensionless velocity gradient is $-0.5$  (e.g. a velocity of zero at its left end at $x=0.0$, and a velocity of $-0.5$ at its right end at $x=1.0$), simply integrating the velocity gradient would suggest that the grain reaches a length of zero after two units of time, and would then ``flip'' its orientation, which is clearly non-physical.
-What happens instead can be seen by solving the equation of motion for the right end of the grain $\frac{dx}{dt} = v = -0.5 x$. Solving this equation for $x$ leads to $x(t) = e^{-0.5t}$. This is therefore also the solution for $\mathbf F$ since $\mathbf F x$ transforms the initial position of $x(t=0)=1.0$ into the deformed position of $x(t=1) = e^{-0.5}$, which is the definition of $\mathbf F$.
-
-In more general cases a visualization of $\mathbf F$ is not intuitive, because it contains rotational components that represent a rigid body rotation without deformation. Following \cite{Becker2003} we can polar-decompose the tensor into a positive-definite and symmetric left stretching tensor $\mathbf L$, and an orthogonal rotation tensor $\mathbf Q$, as $\mathbf F = \mathbf L \mathbf Q$, therefore $\mathbf L^2 = \mathbf L \mathbf L^T = \mathbf F \mathbf F^T$. The left stretching tensor $\mathbf L$ (or finite strain tensor) then describes the deformation we are interested in, and its eigenvalues $\lambda_i$ and eigenvectors $\mathbf e_i$ describe the length and orientation of the half-axes of the finite strain ellipsoid. Moreover, we will represent the amount of relative stretching at every point by the ratio $\ln(\lambda_1/\lambda_2)$, called the \textit{natural strain} \cite{Ribe1992}.
-
-The full plugin implementing the integration of $\mathbf F$ can be found in \url{cookbooks/finite_strain/finite_strain.cc} and can be compiled
-with \texttt{cmake . \&\& make} in the \url{cookbooks/finite_strain} directory.
-It can be loaded in a parameter file as an ``Additional shared library'', and selected as material
-model. As it is derived from the ``simple'' material model, all input parameters for the material
-properties are read in from the subsection \texttt{Simple model}.
-\lstinputlisting[language=prmfile]{cookbooks/finite_strain/doc/finite_strain.part.prm.out}
-
-\begin{figure}
-    \centering
-    \includegraphics[width=0.75\textwidth]{cookbooks/finite_strain/doc/finite_strain.pdf}
-    \caption{\it Accumulated finite strain in an example convection model, as described in Section
-             \ref{sec:finite-strain} at a time of 67.6~Ma. Top panel: Temperature distribution. Bottom panel:
-             Natural strain distribution. Additional black crosses are the scaled eigenvectors of the
-             stretching tensor $\mathbf L$, showing the direction of stretching and compression.}
-    \label{fig:finite_strain}
-\end{figure}
-
-The plugin was tested against analytical solutions for the deformation gradient tensor in simple and pure shear as described in \url{benchmarks/finite_strain/pure_shear.prm} and \url{benchmarks/finite_strain/simple_shear.prm}.
-
-We will demonstrate its use at the example of a 2D Cartesian convection model (Figure~\ref{fig:finite_strain}):
-Heating from the bottom leads to the ascent of plumes from the boundary layer (top panel), and the
-amount of stretching is visible in the distribution of natural strain (color in lower panel).
-Additionally, the black crosses show the direction of stretching and compression (the eigenvectors of $\mathbf L$).
-Material moves to the sides at the top of the plume head, so that it is shortened in vertical
-direction (short vertical lines) and stretched in horizontal direction (long horizontal lines).
-The sides of the plume head show the opposite effect. Shear occurs mostly at the
-edges of the plume head, in the plume tail, and in the bottom boundary layer
-(black areas in the natural strain distribution).
-
-The example used here shows how history variables can be integrated up over the model evolution.
-While we do not use these variables actively in the computation (in our example, there is no
-influence of the accumulated strain on the rheology or any other material property), it would be trivial
-to extend this material model in a way that material properties depend on the integrated strain:
-Because the values of the compositional fields are part of what the material model gets as inputs,
-they can easily be used for computing material model outputs such as the viscosity.
-
-\note{In this model we present the use of multiple compositional fields for other purposes than chemical composition.
-It would have been feasible to run the same model with particles that track the deformation gradient, as
-additionally implemented and tested in the simple shear and pure shear benchmarks mentioned in this section.
-Both approaches have specific advantages, and for scientific computations one needs to evaluate the more suitable
-strategy. Compositional fields cover the whole domain, but are affected by numerical diffusion, effectively reducing the
-maximum accumulated strain. Particles only provide finite strain values at discrete positions, but can, if this is desired, be used in
-fewer numbers and only a part of the model domain (and are much faster in this case). If however
-there needs to be a large number of particles (possibly because they are used for other purposes as well), then they
-can be much more expensive. Both approaches can be used to actively influence the rheology in the material model.}
-
-\subsubsection{Reading in compositional initial composition files generated with geomIO}
-\label{sec:geomio}
-\textit{This section was contributed by Juliane Dannberg}
-
-\note{This cookbook is based on a developer version of geomIO from July 2016. In the meantime, the development of
-geomIO continued, and there is now a publication\cite{bauvillegeomio} that describes its features and how they can be used in more detail.}
-
-Many geophysical setups require initial conditions with several different materials and complex geometries.
-Hence, sometimes it would be easier to generate the initial geometries of the materials as a drawing instead
-of by writing code. The MATLAB-based library geomIO (\url{https://bitbucket.org/geomio/geomio}, \cite{bauvillegeomio}) provides a convenient tool
-to convert a drawing generated with the vector graphics editor Inkscape (\url{https://inkscape.org/en/}) to a data
-file that can be read into \aspect{}. Here, we will demonstrate how this can be done for a 2D setup for a model
-with one compositional field, but geomIO also has the capability to create 3D volumes based on a series of 2D vector
-drawings using any number of different materials. Similarly, initial conditions defined in this way can also be used with particles
-instead of compositional fields.
-
-To obtain the developer version of geomIO, you can clone the bitbucket repository by executing the command
-\begin{verbatim}
- git clone https://bitbucket.org/geomio/geomio.git
-\end{verbatim}
-or you can download geomIO \href{https://bitbucket.org/geomio/geomio/downloads}{here}.
-You will then need to add the geomIO source folders to your MATLAB path by running the file located in
-\texttt{/path/to/geomio/installation/InstallGeomIO.m}.
-An extensive documentation for how to use geomIO can be found \href{http://geomio-doc.bitbucket.org/}{here}.
-Among other things, it explains \href{http://geomio-doc.bitbucket.org/tuto2D.html#drawing}{how to generate drawings in Inkscape}
-that can be read in by geomIO, which involves assigning new attributes to paths in Inkscape's XML editor.
-In particular, a new property `phase' has to be added to each path, and set to a value corresponding to the
-index of the material that should be present in this region in the initial condition of the geodynamic model.
-
-\note{geomIO currently only supports the latest stable version of Inkscape (0.91), and other versions might not
-  work with geomIO or cause errors. Moreover, geomIO currently does not support grouping paths (paths can still
-  be combined using \texttt{Path$\rightarrow$Union}, \texttt{Path$\rightarrow$Difference} or similar commands),
-  and only the outermost closed contour of a path will be considered. This means that, for example, for modeling a spherical
-  annulus, you would have to draw two circles, and assign the inner one the same phase as the background of your drawing.}
-
-We will here use a drawing of a jellyfish located in \url{cookbooks/geomio/jellyfish.svg}, where different phases
-have already been assigned to each path (Figure~\ref{fig:jelly-picture}).
-\begin{figure}[tb]
-    \centering
-    \includegraphics[width=0.2\textwidth]{cookbooks/geomio/doc/jellyfish.pdf}
-    \caption{\it Vector drawing of a jellyfish.}
-    \label{fig:jelly-picture}
-\end{figure}
-\note{The page of your drawing in Inkscape should already have the extents (in px) that you later want to use in your model (in m).}
-
-After geomIO is initialized in MATLAB, we \href{http://geomio-doc.bitbucket.org/tuto2D.html#assigning-phase-to-markers}
-{run geomIO as described in the documentation}, loading the default options and then specifying all the option we want to
-change, such as the path to the input file, or the resolution:
-\lstinputlisting[language=matlab]{cookbooks/geomio/doc/run_geomio.part1.m}
-You can view all of the options available by typing \texttt{opt} in MATLAB.
-
-In the next step we create the grid that is used for the coordinates in the \texttt{ascii data} initial conditions file
-and assign a phase to each grid point:
-\lstinputlisting[language=matlab]{cookbooks/geomio/doc/run_geomio.part2.m}
-You can plot the \texttt{Phase} variable in MATLAB to see if the drawing was read in and all phases are assigned correctly
-(Figure~\ref{fig:jelly-plot}).
-\begin{figure}[tb]
-    \centering
-    \includegraphics[width=0.45\textwidth]{cookbooks/geomio/doc/jelly.png}
-    \caption{\it Plot of the \texttt{Phase} variable in MATLAB.}
-    \label{fig:jelly-plot}
-\end{figure}
-Finally, we want to write output in a format that can be read in by \aspect{}'s \texttt{ascii data} compositional
-initial conditions plugin. We write the data into the file \texttt{jelly.txt}:
-\lstinputlisting[language=matlab]{cookbooks/geomio/doc/save_file_as_txt.m}
-
-To read in the file we just created (a copy is located in \aspect{}'s data directory),
-we set up a model with a box geometry with the same extents we specified for the drawing in px
-and one compositional field. We choose the \texttt{ascii data} compositional initial conditions and specify that we
-want to read in our jellyfish. The relevant parts of the input file are listed below:
-\lstinputlisting[language=prmfile]{cookbooks/geomio/doc/geomIO.prm.out}
-
-If we look at the output in \texttt{ParaView}, we can see our jellyfish, with the mesh refined at the
-boundaries between the different phases (Figure~\ref{fig:jelly-paraview}).
-\begin{figure}[tb]
-    \centering
-    \includegraphics[width=0.55\textwidth]{cookbooks/geomio/doc/jelly-paraview.pdf}
-    \caption{\it \aspect{} model output of the jellyfish and corresponding mesh in ParaView.}
-    \label{fig:jelly-paraview}
-\end{figure}
-
-For a geophysical setup, the MATLAB code could be extended to write out the phases into several different columns
-of the ASCII data file (corresponding to different compositional fields). This initial conditions file could then be
-used in \aspect{} with a material model such as the \texttt{multicomponent} model, assigning each phase different
-material properties.
-
-An animation of a model using the jellyfish as initial condition and assigning it a higher viscosity can be found here: \url{https://www.youtube.com/watch?v=YzNTubNG83Q}.
+% cookbooks/geomio
+\input{cookbooks/geomio/doc/geomio.tex}
 
 \subsubsection{Using lazy expression syntax for if-else-statements in function expressions}
 \label{sec:lazy-expression}
@@ -6777,6 +6434,11 @@ and gravity anomalies from ASPECT and a spectral based code shows good agreement
 \input{../../cookbooks/burnman/doc/burnman.tex}
 
 
+% cookbooks/steinberger/
+
+\input{../../cookbooks/steinberger/doc/steinberger.tex}
+
+
 \subsubsection{Reproducing rheology of Morency and Doin, 2004}
 \label{sec:cookbooks-morency-doin}
 \textit{This section was contributed by Jonathan Perry-Houts}
@@ -7190,7 +6852,67 @@ Some ideas for adapting the model setup:
 \end{itemize}
 
 
+\subsubsection{Kinematically-driven 2d oceanic subduction}
+\label{sec:cookbooks-kinematic-2d-oceanic-subduction}
 
+\textit{This section was contributed by Anne Glerum.}
+
+This subduction example is based on the benchmark effort of Quinquis et al., of which initial results were published in \cite{Quinquis2014}. In four increasingly complex setups we will go from isoviscous materials without any temperature effects to a fully thermo-mechanical, nonlinear, strain-weakened visco-plastic, externally-driven model of oceanic subduction. The setup of the most complex case is outlined in Fig.~\ref{fig:QQ_setup}. The models are run for 15 My and slab tip depth, trench location, RMS velocity and temperature, and viscous dissipation are monitored. In addition, we discuss the effects of the element size of the subduction interface and crustal layers, viscosity averaging and the solver tolerance.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{cookbooks/kinematically_driven_subduction_2d_case1/doc/setup_Quinquis2014.png}
+    \caption{Case 4 model setup. Copied from Quinquis (2014).}
+    \label{fig:QQ_setup}
+\end{figure}
+
+\paragraph{Case 1: Simple geometry and rheology}
+The Case 1 model setup considers three materials (compositional fields) apart from the background sublithospheric mantle (see Fig.~\ref{fig:QQ_case1_setup}): 
+\begin{enumerate}
+    \item the lithosphere of the overriding plate (combining the BOC, SHB and thermal layer of the overriding plate in Fig.~\ref{fig:QQ_setup}),
+    \item the crust of the subducting plate (weak seed and BOC combined), and
+    \item the mantle lithosphere of the subducting plate (SHB and thermal layer combined).
+\end{enumerate}{}
+The geometry of these compositions is implemented as follows:
+\lstinputlisting[language=prmfile]{cookbooks/kinematically_driven_subduction_2d_case1/doc/Case1_compositions.prm.out}
+
+No differences in material properties exist, except for density and viscosity, so we use the multicomponent material model. To keep the boundaries between fields as sharp as possible in terms of viscosity, we use the maximum composition to determine the viscosity in each evaluation point (note that this can be harder on the solver):
+\lstinputlisting[language=prmfile]{cookbooks/kinematically_driven_subduction_2d_case1/doc/Case1_materialmodel.prm.out}
+
+Temperature effects are ignored. Subduction is driven by prescribed in- and outflow through the right boundary (with a gradual transition of the flow direction), all other boundaries are free slip. The volume of material that flows in is balanced by the volume that is prescribed to flow out (this is important as the model is incompressible). A weak crust along the plate interface and the subducting lithosphere facilitates subduction. Through the function plugin, we prescribe the in- and outflow:
+\lstinputlisting[language=prmfile]{cookbooks/kinematically_driven_subduction_2d_case1/doc/Case1_velocity.prm.out}
+
+To follow the slab on its descent into the mantle, we use adaptive mesh refinement based on viscosity in combination with the minimum refinement strategy to ensure sufficient resolution in the crust and weak zone that allow the slab to detach from the surface:
+\lstinputlisting[language=prmfile]{cookbooks/kinematically_driven_subduction_2d_case1/doc/Case1_meshrefinement.prm.out}
+
+To monitor the model evolution, several diagnostic quantities are tracked over time: the depth of the tip of the slab, the position of the trench, the RMS velocity of the slab and the whole model domain, and the work done (viscous dissipation) in the slab and total model domain. The computation of these quantities in done in several new plugins:
+\lstinputlisting[language=prmfile]{cookbooks/kinematically_driven_subduction_2d_case1/doc/Case1_postprocessing.prm.out}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.6\textwidth,trim=1cm 7cm 1cm 8cm, clip=true]{cookbooks/kinematically_driven_subduction_2d_case1/doc/Case1_dens_t0.png}
+    \includegraphics[width=0.6\textwidth,trim=1cm 7cm 1cm 8cm, clip=true]{cookbooks/kinematically_driven_subduction_2d_case1/doc/Case1_visc_t0.png}
+    \includegraphics[width=0.6\textwidth,trim=1cm 7cm 1cm 8cm, clip=true]{cookbooks/kinematically_driven_subduction_2d_case1/doc/Case1_vel_t0.png}
+    \caption{\it Case 1 density, viscosity and velocity at time zero.}
+    \label{fig:QQ_case1_setup}
+\end{figure}
+
+We run the Case 1 setup for 15 My of model time. The diagnostic quantities in Fig.~\ref{fig:QQ_case1_diagnostics} show three stages of model evolution: first trench advance (top right plot), then free subduction (increasing slab RMS velocity), and after about 13 My interaction between the slab and bottom boundary at 660 km depth, which slows down the slab. The slab then curves inward along the bottom boundary. This can also be seen in Fig~\ref{fig:QQ_case1_results}.
+
+\begin{figure}
+    \centering
+    \includegraphics[trim=1cm 1cm 10cm 0cm,width=.8\textwidth]{cookbooks/kinematically_driven_subduction_2d_case1/doc/Case1_diagnostics}
+    \caption{\it Case 1 diagnostic quantities of ASPECT, Sulec and Elefant results.}
+    \label{fig:QQ_case1_diagnostics}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.6\textwidth,trim=1cm 10cm 1cm 9cm, clip=true]{cookbooks/kinematically_driven_subduction_2d_case1/doc/Case1_visc_8My.png}
+    \includegraphics[width=0.6\textwidth,trim=1cm 7cm 1cm 9cm, clip=true]{cookbooks/kinematically_driven_subduction_2d_case1/doc/Case1_visc_15My.png}
+    \caption{\it Case 1 viscosity snapshots at 8 and 15 My.}
+    \label{fig:QQ_case1_results}
+\end{figure}
 
 \subsection{Benchmarks}
 \label{sec:cookbooks-benchmarks}
@@ -7561,41 +7283,8 @@ We can observe that when the two-layer viscosity model is added, there is only o
 
 \input{cookbooks/van-keken-vof/doc/van-keken-vof.tex}
 
-
-\subsubsection{The Bunge et al.~mantle convection experiments}
-\label{sec:bunge_et_al_cookbook}
-
-\textit{This section was contributed by Cedric Thieulot and Bob Myhill.}
-
-Early mantle modeling studies of the 1970s, 1980s and 1990s were often concerned with simple set-ups (Cartesian geometries, incompressible fluid, free slip boundary conditions) and investigated the influence of the Rayleigh number, the heating mode or the temperature dependence of the viscosity on temperature, pressure and/or strain rate \cite{youn74,buss75,buss79,BBC89,BC93,vavy93,burb97}. In this cookbook, we use the `simple' material model to reproduce the set-up in \cite{burb96}, which reported that even modest increases in mantle viscosity with depth could have a marked effect on the style of mantle convection. The prm file corresponding to this cookbook can be found at \url{cookbooks/bunge_et_al_mantle_convection/bunge_et_al.prm}.
-
-Although the original article showcases results obtained in a 3D hollow sphere, we here run the models in an annular domain of inner radius $R\textsubscript{inner} = 3480~\si{\km}$ and outer radius  $R\textsubscript{outer} = 6370~\si{\km}$. The surface temperature is set to $T{\textsubscript{surf}}$ = 1060 \si{\kelvin} and
-the bottom temperature to $T{\textsubscript{cmb}} = 3450$ \si{\kelvin}. The gravity vector is radial and its magnitude is $g = 10$ \si{\meter\per\second\squared}.
-
-There is a single incompressible fluid in the domain, characterized by $\rho_0 = 4500$ \si{\kilogram\per\meter\cubed}, $\alpha = 2.5\cdot10^{-5}$ \si{\per\kelvin},
-$k = 4$ \si{\watt\per\meter\per\kelvin},
-$C_p = 1000$ \si{\joule\per\kilogram\per\kelvin} and
-its internal heating rate is $Q{\textsubscript{int}} = 1\cdot10^{-12}$ \si{\watt\per\kilogram}.
-The interface between the upper mantle (viscosity $\eta\textsubscript{um}$)
-and the lower mantle (viscosity $\eta\textsubscript{lm}$) is fixed at 670 \si{\kilo\meter} depth.
-As in the article we consider four time-independent radial viscosity profiles:
-
-\begin{itemize}
-\item[a)] Isoviscous mantle: $\eta\textsubscript{um}=\eta\textsubscript{lm}=1.7\cdot 10^{24}$ \si{\pascal\second}
-\item[b)] Mantle with step change in viscosity: $\eta\textsubscript{um}=5.8\cdot 10^{22}$ \si{\pascal\second}, $\eta\textsubscript{lm}=30\eta\textsubscript{um}$
-\item[c)] Isoviscous mantle: $\eta\textsubscript{um}=\eta\textsubscript{lm}=5.8\cdot 10^{22}$ \si{\pascal\second}
-\item[d)] Mantle with step change in viscosity: $\eta\textsubscript{um}=7\cdot 10^{21}$ \si{\pascal\second},  $\eta\textsubscript{lm}=30\eta\textsubscript{um}$
-\end{itemize}
-
-Separate ascii files {\tt visc\_depth\_X.txt} with {\tt X=\{a,b,c,d\}} contain each of these viscosity profiles. The resulting temperature fields after 5 billion years of convection are shown in Fig.~\ref{fig:bunge_et_al}. Similar to the results obtained by \cite{burb96}, models in which the lower mantle is more viscous than the upper mantle are distinctly colder than their isoviscous equivalents, with more clearly defined upwellings. You can find a movie of how the temperature evolves over this time period at
-\url{https://youtu.be/5SPCU1sFGGc}.
-
-\begin{figure}[tbp]
-  \centering
-  \includegraphics[width=0.9\textwidth]{cookbooks/bunge_et_al_mantle_convection/temps.png}
-  \caption{\it Bunge et al.~benchmark. From left to right: temperature field at time $t=5\cdot 10^9$ years obtained with viscosity profiles a, b, c and d.}
-  \label{fig:bunge_et_al}
-\end{figure}
+% cookbooks/bunge_et_al_mantle_convection/
+\input{cookbooks/bunge_et_al_mantle_convection/doc/bunge_et_al_mantle_convection.tex}
 
 
 \subsubsection{The Rayleigh-Taylor instability}
