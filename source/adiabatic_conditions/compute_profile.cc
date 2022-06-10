@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2011 - 2019 by the authors of the ASPECT code.
+  Copyright (C) 2011 - 2021 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -70,7 +70,7 @@ namespace aspect
       MaterialModel::MaterialModelOutputs<dim> out(1, this->n_compositional_fields());
 
       // Constant properties on the reference profile
-      in.strain_rate.resize(0); // we do not need the viscosity
+      in.requested_properties = MaterialModel::MaterialProperties::equation_of_state_properties;
       in.velocity[0] = Tensor <1,dim> ();
 
       // Check whether gravity is pointing up / out or down / in. In the normal case it should

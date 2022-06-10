@@ -54,8 +54,8 @@ namespace aspect
             beta_(beta)
           {}
 
-          virtual void vector_value (const Point< dim >   &pos,
-                                     Vector< double >   &values) const
+          virtual void vector_value (const Point<dim>   &pos,
+                                     Vector<double>   &values) const
           {
             Assert (dim == 2, ExcNotImplemented());
             Assert (values.size() >= 4, ExcInternalError());
@@ -164,14 +164,6 @@ namespace aspect
 
 
         /**
-         * @name Reference quantities
-         * @{
-         */
-        virtual double reference_viscosity () const;
-        /**
-         * @}
-         */
-        /**
          * Returns the viscosity value in the inclusion
          */
         double get_beta() const;
@@ -181,15 +173,6 @@ namespace aspect
          */
         double beta;
     };
-
-
-    template <int dim>
-    double
-    DoneaHuertaMaterial<dim>::
-    reference_viscosity () const
-    {
-      return 1;
-    }
 
 
     template <int dim>
@@ -373,7 +356,7 @@ namespace aspect
     std::pair<std::string,std::string>
     DoneaHuertaPostprocessor<dim>::execute (TableHandler &)
     {
-      std::unique_ptr<Function<dim> > ref_func;
+      std::unique_ptr<Function<dim>> ref_func;
       {
         const DoneaHuertaMaterial<dim> *
         material_model

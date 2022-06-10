@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2017 - 2021 by the authors of the ASPECT code.
+  Copyright (C) 2017 - 2022 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -256,6 +256,7 @@ namespace aspect
             case Parameters<dim>::AdvectionFieldMethod::fem_field:
             case Parameters<dim>::AdvectionFieldMethod::fem_melt_field:
             case Parameters<dim>::AdvectionFieldMethod::prescribed_field_with_diffusion:
+            case Parameters<dim>::AdvectionFieldMethod::fem_darcy_field:
             {
               // if this is a prescribed field with diffusion, we first have to copy the material model
               // outputs into the prescribed field before we assemble and solve the equation

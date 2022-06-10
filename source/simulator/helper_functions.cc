@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2011 - 2021 by the authors of the ASPECT code.
+  Copyright (C) 2011 - 2022 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -426,6 +426,9 @@ namespace aspect
     MaterialModel::MaterialModelOutputs<dim> out(n_q_points,
                                                  introspection.n_compositional_fields);
 
+    // We do not need to compute anything but the viscosity
+    in.requested_properties = MaterialModel::MaterialProperties::viscosity;
+
     for (const auto &cell : dof_handler.active_cell_iterators())
       if (cell->is_locally_owned())
         {
@@ -802,9 +805,9 @@ namespace aspect
       {
         const types::boundary_id top_boundary_id = geometry_model->translate_symbolic_boundary_name_to_id("top");
 
-        const Quadrature<dim-1> &quadrature = this->introspection.face_quadratures.velocities;
-
+        const Quadrature<dim-1> &quadrature = this->introspection.face_quadratures.pressure;
         const unsigned int n_q_points = quadrature.size();
+
         FEFaceValues<dim> fe_face_values (*mapping, finite_element,  quadrature,
                                           update_JxW_values | update_values);
 
@@ -835,9 +838,9 @@ namespace aspect
       }
     else if (parameters.pressure_normalization == "volume")
       {
-        const Quadrature<dim> &quadrature = this->introspection.quadratures.velocities;
-
+        const Quadrature<dim> &quadrature = this->introspection.quadratures.pressure;
         const unsigned int n_q_points = quadrature.size();
+
         FEValues<dim> fe_values (*mapping, finite_element,  quadrature,
                                  update_JxW_values | update_values);
 
@@ -1317,7 +1320,7 @@ namespace aspect
     const unsigned int n_q_points_2 = quadrature_formula_2.size();
     const unsigned int n_q_points   = dim * n_q_points_2 * static_cast<unsigned int>(std::pow(n_q_points_1, dim-1));
 
-    std::vector< Point <dim>> quadrature_points;
+    std::vector<Point <dim>> quadrature_points;
     quadrature_points.reserve(n_q_points);
 
     switch (dim)
@@ -2036,7 +2039,7 @@ namespace aspect
   void
   Simulator<dim>::replace_outflow_boundary_ids(const unsigned int offset)
   {
-    const QGauss<dim-1> quadrature_formula (finite_element.base_element(introspection.base_elements.temperature).degree+1);
+    const Quadrature<dim-1> &quadrature_formula = introspection.face_quadratures.temperature;
 
     FEFaceValues<dim> fe_face_values (*mapping,
                                       finite_element,
@@ -2266,7 +2269,7 @@ namespace aspect
 
     // Check that the periodic boundaries do not have other boundary conditions set
     using periodic_boundary_set
-      = std::set< std::pair< std::pair< types::boundary_id, types::boundary_id>, unsigned int>>;
+      = std::set<std::pair<std::pair<types::boundary_id, types::boundary_id>, unsigned int>>;
 
     periodic_boundary_set pbs = geometry_model->get_periodic_boundary_pairs();
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2011 - 2020 by the authors of the ASPECT code.
+  Copyright (C) 2011 - 2021 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -32,7 +32,8 @@ namespace aspect
       DynamicTopography ()
         :
         DataPostprocessorScalar<dim> ("dynamic_topography",
-                                      update_quadrature_points)
+                                      update_quadrature_points),
+        Interface<dim>("m")
       {}
 
 
@@ -148,7 +149,9 @@ namespace aspect
                                                   "Alternatively, consider using the "
                                                   "\"surface dynamic topography\" visualization postprocessor "
                                                   "to only output the dynamic topography at the boundary of "
-                                                  "the domain.")
+                                                  "the domain."
+                                                  "\n\n"
+                                                  "Physical units: \\si{\\meter}.")
     }
   }
 }

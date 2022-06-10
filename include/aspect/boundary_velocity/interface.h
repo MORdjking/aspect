@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2011 - 2019 by the authors of the ASPECT code.
+  Copyright (C) 2011 - 2022 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -396,11 +396,11 @@ namespace aspect
   namespace ASPECT_REGISTER_BOUNDARY_VELOCITY_MODEL_ ## classname \
   { \
     aspect::internal::Plugins::RegisterHelper<aspect::BoundaryVelocity::Interface<2>,classname<2>> \
-        dummy_ ## classname ## _2d (&aspect::BoundaryVelocity::Manager<2>::register_boundary_velocity, \
-                                    name, description); \
+    dummy_ ## classname ## _2d (&aspect::BoundaryVelocity::Manager<2>::register_boundary_velocity, \
+                                name, description); \
     aspect::internal::Plugins::RegisterHelper<aspect::BoundaryVelocity::Interface<3>,classname<3>> \
-        dummy_ ## classname ## _3d (&aspect::BoundaryVelocity::Manager<3>::register_boundary_velocity, \
-                                    name, description); \
+    dummy_ ## classname ## _3d (&aspect::BoundaryVelocity::Manager<3>::register_boundary_velocity, \
+                                name, description); \
   }
   }
 }

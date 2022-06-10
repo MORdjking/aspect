@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2011 - 2020 by the authors of the ASPECT code.
+  Copyright (C) 2011 - 2022 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -203,6 +203,8 @@ namespace aspect
         entropy_derivative_pressure    = 128,
         entropy_derivative_temperature = 256,
         reaction_terms                 = 512,
+        reaction_rates                 = 1024,
+        additional_outputs             = 2048,
 
         equation_of_state_properties   = density |
                                          thermal_expansion_coefficient |
@@ -213,7 +215,9 @@ namespace aspect
         all_properties                 = equation_of_state_properties |
                                          viscosity |
                                          thermal_conductivity |
-                                         reaction_terms
+                                         reaction_terms |
+                                         reaction_rates |
+                                         additional_outputs
       };
 
       /**
@@ -1179,6 +1183,45 @@ namespace aspect
 
 
     /**
+    * Additional output fields for the enthalpy change upon melting or
+    * freezing to be added to the MaterialModel::MaterialModelOutputs
+    * structure and filled in the MaterialModel::Interface::evaluate()
+    * function.
+    * These outputs are needed in heating models that compute the latent
+    * heat of melting/freezing based on the material properties in the
+    * material models (which is required for thermodynamically consistent
+    * models).
+    */
+    template <int dim>
+    class EnthalpyOutputs : public AdditionalMaterialOutputs<dim>
+    {
+      public:
+        EnthalpyOutputs(const unsigned int n_points)
+          : enthalpies_of_fusion(n_points, numbers::signaling_nan<double>())
+        {}
+
+        virtual ~EnthalpyOutputs()
+        {}
+
+        virtual void average (const MaterialAveraging::AveragingOperation operation,
+                              const FullMatrix<double>  &/*projection_matrix*/,
+                              const FullMatrix<double>  &/*expansion_matrix*/)
+        {
+          AssertThrow(operation == MaterialAveraging::AveragingOperation::none,ExcNotImplemented());
+          return;
+        }
+
+        /**
+         * Enthalpies of fusion, describing the amount of heat required to
+         * melt/solidify the material. These values are used when computing
+         * latent heat effects.
+         */
+        std::vector<double> enthalpies_of_fusion;
+    };
+
+
+
+    /**
      * A base class for parameterizations of material models. Classes derived
      * from this class will need to implement functions that provide material
      * parameters such as the viscosity, density, etc, typically as a function
@@ -1188,7 +1231,7 @@ namespace aspect
      * argument struct instead of implementing the functions viscosity(),
      * density(), etc.. In this case, all other functions are being ignored.
      *
-     * In all cases, model_dependence values, is_compressible(), reference_viscosity()
+     * In all cases, model_dependence values, is_compressible()
      * need to be implemented.
      *
      * @ingroup MaterialModels
@@ -1257,33 +1300,6 @@ namespace aspect
          * (incompressible Stokes).
          */
         virtual bool is_compressible () const = 0;
-        /**
-         * @}
-         */
-
-        /**
-         * @name Reference quantities
-         * @{
-         */
-        /**
-         * Return a reference value typical of the viscosities that appear in
-         * this model. This value is not actually used in the material
-         * description itself, but is used in scaling variables to the same
-         * numerical order of magnitude when solving linear systems.
-         * Specifically, the reference viscosity appears in the factor scaling
-         * the pressure against the velocity. It is also used in computing
-         * dimension-less quantities. You may want to take a look at the
-         * Kronbichler, Heister, Bangerth 2012 paper that describes the
-         * design of ASPECT for a description of this pressure scaling.
-         *
-         * @note The reference viscosity should take into account the complete
-         * constitutive relationship, defined as the scalar viscosity times the
-         * constitutive tensor. In most cases, the constitutive tensor will simply
-         * be the identity tensor (this is the default case), but this may become
-         * important for material models with anisotropic viscosities, if the
-         * constitutive tensor is not normalized.
-         */
-        virtual double reference_viscosity () const = 0;
         /**
          * @}
          */
@@ -1535,11 +1551,11 @@ namespace aspect
   namespace ASPECT_REGISTER_MATERIAL_MODEL_ ## classname \
   { \
     aspect::internal::Plugins::RegisterHelper<aspect::MaterialModel::Interface<2>,classname<2>> \
-        dummy_ ## classname ## _2d (&aspect::MaterialModel::register_material_model<2>, \
-                                    name, description); \
+    dummy_ ## classname ## _2d (&aspect::MaterialModel::register_material_model<2>, \
+                                name, description); \
     aspect::internal::Plugins::RegisterHelper<aspect::MaterialModel::Interface<3>,classname<3>> \
-        dummy_ ## classname ## _3d (&aspect::MaterialModel::register_material_model<3>, \
-                                    name, description); \
+    dummy_ ## classname ## _3d (&aspect::MaterialModel::register_material_model<3>, \
+                                name, description); \
   }
   }
 }

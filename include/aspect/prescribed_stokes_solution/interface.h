@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2011 - 2018 by the authors of the ASPECT code.
+  Copyright (C) 2011 - 2022 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -196,11 +196,11 @@ namespace aspect
   namespace ASPECT_REGISTER_PRESCRIBED_STOKES_SOLUTION_ ## classname \
   { \
     aspect::internal::Plugins::RegisterHelper<aspect::PrescribedStokesSolution::Interface<2>,classname<2>> \
-        dummy_ ## classname ## _2d (&aspect::PrescribedStokesSolution::register_prescribed_stokes_solution_model<2>, \
-                                    name, description); \
+    dummy_ ## classname ## _2d (&aspect::PrescribedStokesSolution::register_prescribed_stokes_solution_model<2>, \
+                                name, description); \
     aspect::internal::Plugins::RegisterHelper<aspect::PrescribedStokesSolution::Interface<3>,classname<3>> \
-        dummy_ ## classname ## _3d (&aspect::PrescribedStokesSolution::register_prescribed_stokes_solution_model<3>, \
-                                    name, description); \
+    dummy_ ## classname ## _3d (&aspect::PrescribedStokesSolution::register_prescribed_stokes_solution_model<3>, \
+                                name, description); \
   }
   }
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2017 - 2020 by the authors of the ASPECT code.
+  Copyright (C) 2017 - 2022 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -199,22 +199,22 @@ namespace aspect
           face_finite_element_values (face_quadrature.size() > 0
                                       ?
                                       std::make_unique<FEFaceValues<dim>> (mapping,
-                                                                           finite_element, face_quadrature,
-                                                                           face_update_flags)
+                                                                            finite_element, face_quadrature,
+                                                                            face_update_flags)
                                       :
                                       nullptr),
           neighbor_face_finite_element_values (face_quadrature.size() > 0
                                                ?
                                                std::make_unique<FEFaceValues<dim>> (mapping,
-                                                                                    finite_element, face_quadrature,
-                                                                                    face_update_flags)
+                                                                                     finite_element, face_quadrature,
+                                                                                     face_update_flags)
                                                :
                                                nullptr),
           subface_finite_element_values (face_quadrature.size() > 0
                                          ?
                                          std::make_unique<FESubfaceValues<dim>> (mapping,
-                                                                                 finite_element, face_quadrature,
-                                                                                 face_update_flags)
+                                                                                  finite_element, face_quadrature,
+                                                                                  face_update_flags)
                                          :
                                          nullptr),
           local_dof_indices (finite_element.dofs_per_cell),
@@ -287,25 +287,25 @@ namespace aspect
           face_finite_element_values (scratch.face_finite_element_values.get()
                                       ?
                                       std::make_unique<FEFaceValues<dim>> (scratch.face_finite_element_values->get_mapping(),
-                                                                           scratch.face_finite_element_values->get_fe(),
-                                                                           scratch.face_finite_element_values->get_quadrature(),
-                                                                           scratch.face_finite_element_values->get_update_flags())
+                                                                            scratch.face_finite_element_values->get_fe(),
+                                                                            scratch.face_finite_element_values->get_quadrature(),
+                                                                            scratch.face_finite_element_values->get_update_flags())
                                       :
                                       nullptr),
           neighbor_face_finite_element_values (scratch.neighbor_face_finite_element_values.get()
                                                ?
                                                std::make_unique<FEFaceValues<dim>> (scratch.neighbor_face_finite_element_values->get_mapping(),
-                                                                                    scratch.neighbor_face_finite_element_values->get_fe(),
-                                                                                    scratch.neighbor_face_finite_element_values->get_quadrature(),
-                                                                                    scratch.neighbor_face_finite_element_values->get_update_flags())
+                                                                                     scratch.neighbor_face_finite_element_values->get_fe(),
+                                                                                     scratch.neighbor_face_finite_element_values->get_quadrature(),
+                                                                                     scratch.neighbor_face_finite_element_values->get_update_flags())
                                                :
                                                nullptr),
           subface_finite_element_values (scratch.subface_finite_element_values.get()
                                          ?
                                          std::make_unique<FESubfaceValues<dim>> (scratch.subface_finite_element_values->get_mapping(),
-                                                                                 scratch.subface_finite_element_values->get_fe(),
-                                                                                 scratch.subface_finite_element_values->get_quadrature(),
-                                                                                 scratch.subface_finite_element_values->get_update_flags())
+                                                                                  scratch.subface_finite_element_values->get_fe(),
+                                                                                  scratch.subface_finite_element_values->get_quadrature(),
+                                                                                  scratch.subface_finite_element_values->get_update_flags())
                                          :
                                          nullptr),
           local_dof_indices (scratch.finite_element_values.get_fe().dofs_per_cell),
@@ -609,7 +609,7 @@ namespace aspect
     std::vector<double>
     AdvectionStabilizationInterface<dim>::advection_prefactors(internal::Assembly::Scratch::ScratchBase<dim> &scratch_base) const
     {
-      internal::Assembly::Scratch::AdvectionSystem<dim> &scratch = dynamic_cast<internal::Assembly::Scratch::AdvectionSystem<dim>& > (scratch_base);
+      internal::Assembly::Scratch::AdvectionSystem<dim> &scratch = dynamic_cast<internal::Assembly::Scratch::AdvectionSystem<dim>&> (scratch_base);
 
       std::vector<double> prefactors(scratch.material_model_inputs.n_evaluation_points(), 1.0);
 
@@ -626,7 +626,7 @@ namespace aspect
     std::vector<double>
     AdvectionStabilizationInterface<dim>::diffusion_prefactors(internal::Assembly::Scratch::ScratchBase<dim> &scratch_base) const
     {
-      internal::Assembly::Scratch::AdvectionSystem<dim> &scratch = dynamic_cast<internal::Assembly::Scratch::AdvectionSystem<dim>& > (scratch_base);
+      internal::Assembly::Scratch::AdvectionSystem<dim> &scratch = dynamic_cast<internal::Assembly::Scratch::AdvectionSystem<dim>&> (scratch_base);
 
       if (scratch.advection_field->is_temperature())
         return scratch.material_model_outputs.thermal_conductivities;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2011 - 2020 by the authors of the ASPECT code.
+  Copyright (C) 2011 - 2022 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -48,11 +48,11 @@ namespace aspect
 
 
     template <int dim>
-    std::set< std::pair< std::pair<types::boundary_id, types::boundary_id>, unsigned int >>
-        Interface<dim>::get_periodic_boundary_pairs() const
+    std::set<std::pair<std::pair<types::boundary_id, types::boundary_id>, unsigned int>>
+    Interface<dim>::get_periodic_boundary_pairs() const
     {
       // return an empty set in the base class
-      return std::set< std::pair< std::pair< types::boundary_id, types::boundary_id>, unsigned int >>();
+      return std::set<std::pair<std::pair<types::boundary_id, types::boundary_id>, unsigned int>>();
     }
 
 
@@ -343,7 +343,7 @@ namespace aspect
                                                  AffineConstraints<double> &constraints) const
     {
       using periodic_boundary_set
-        = std::set< std::pair< std::pair< types::boundary_id, types::boundary_id>, unsigned int>>;
+        = std::set<std::pair<std::pair<types::boundary_id, types::boundary_id>, unsigned int>>;
       periodic_boundary_set pbs = get_periodic_boundary_pairs();
 
       for (const auto &pb : pbs)
@@ -367,11 +367,11 @@ namespace aspect
     {
       template <>
       std::list<internal::Plugins::PluginList<GeometryModel::Interface<2>>::PluginInfo> *
-                                                                        internal::Plugins::PluginList<GeometryModel::Interface<2>>::plugins = nullptr;
+      internal::Plugins::PluginList<GeometryModel::Interface<2>>::plugins = nullptr;
 
       template <>
       std::list<internal::Plugins::PluginList<GeometryModel::Interface<3>>::PluginInfo> *
-                                                                        internal::Plugins::PluginList<GeometryModel::Interface<3>>::plugins = nullptr;
+      internal::Plugins::PluginList<GeometryModel::Interface<3>>::plugins = nullptr;
     }
   }
 

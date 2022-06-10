@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2011 - 2020 by the authors of the ASPECT code.
+  Copyright (C) 2011 - 2022 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -279,10 +279,10 @@ namespace aspect
     {
       template <>
       std::list<internal::Plugins::PluginList<TerminationCriteria::Interface<2>>::PluginInfo> *
-                                                                              internal::Plugins::PluginList<TerminationCriteria::Interface<2>>::plugins = nullptr;
+      internal::Plugins::PluginList<TerminationCriteria::Interface<2>>::plugins = nullptr;
       template <>
       std::list<internal::Plugins::PluginList<TerminationCriteria::Interface<3>>::PluginInfo> *
-                                                                              internal::Plugins::PluginList<TerminationCriteria::Interface<3>>::plugins = nullptr;
+      internal::Plugins::PluginList<TerminationCriteria::Interface<3>>::plugins = nullptr;
     }
   }
 

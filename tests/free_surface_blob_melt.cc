@@ -25,7 +25,6 @@ namespace aspect
          * @name Reference quantities
          * @{
          */
-        virtual double reference_viscosity () const;
         virtual double reference_darcy_coefficient () const;
         /**
          * @}
@@ -122,7 +121,7 @@ namespace aspect
         }
 
       // fill melt outputs if they exist
-      MeltOutputs<dim> *melt_out = out.template get_additional_output<MeltOutputs<dim> >();
+      MeltOutputs<dim> *melt_out = out.template get_additional_output<MeltOutputs<dim>>();
 
       if (melt_out != nullptr)
         {
@@ -149,14 +148,6 @@ namespace aspect
       for (unsigned int q=0; q<in.n_evaluation_points(); ++q)
         melt_fractions[q] = 0.0;
       return;
-    }
-
-    template <int dim>
-    double
-    MeltFreeSurface<dim>::
-    reference_viscosity () const
-    {
-      return eta;
     }
 
     template <int dim>

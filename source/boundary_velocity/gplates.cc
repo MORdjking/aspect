@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2011 - 2020 by the authors of the ASPECT code.
+  Copyright (C) 2011 - 2022 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -188,8 +188,8 @@ namespace aspect
           {
             velocities[i]
               = std::make_unique<Functions::InterpolatedUniformGridData<2>> (grid_extent,
-                                                                             table_intervals,
-                                                                             velocity_values[i]);
+                                                                              table_intervals,
+                                                                              velocity_values[i]);
           }
 
         AssertThrow(i == n_points,

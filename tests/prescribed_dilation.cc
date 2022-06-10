@@ -61,8 +61,8 @@ namespace aspect
             eta(eta)
           {}
 
-          virtual void vector_value (const Point< dim >   &pos,
-                                     Vector< double >   &values) const
+          virtual void vector_value (const Point<dim>   &pos,
+                                     Vector<double>   &values) const
           {
             Assert (dim == 2, ExcNotImplemented());
             Assert (values.size() >= 3, ExcInternalError());
@@ -151,10 +151,10 @@ namespace aspect
                               MaterialModel::MaterialModelOutputs<dim> &out) const
         {
           MaterialModel::PrescribedPlasticDilation<dim>
-          *prescribed_dilation = out.template get_additional_output<MaterialModel::PrescribedPlasticDilation<dim> >();
+          *prescribed_dilation = out.template get_additional_output<MaterialModel::PrescribedPlasticDilation<dim>>();
 
           MaterialModel::AdditionalMaterialOutputsStokesRHS<dim>
-          *force = out.template get_additional_output<MaterialModel::AdditionalMaterialOutputsStokesRHS<dim> >();
+          *force = out.template get_additional_output<MaterialModel::AdditionalMaterialOutputsStokesRHS<dim>>();
 
           for (unsigned int i=0; i < in.n_evaluation_points(); ++i)
             {
@@ -213,8 +213,6 @@ namespace aspect
         void
         parse_parameters (ParameterHandler &prm);
 
-        virtual double reference_viscosity () const;
-
         double get_eta () const;
 
         /**
@@ -223,15 +221,6 @@ namespace aspect
         double eta;
     };
 
-
-
-    template <int dim>
-    double
-    MyMaterial<dim>::
-    reference_viscosity () const
-    {
-      return 1.;
-    }
 
 
     template <int dim>
@@ -316,7 +305,7 @@ namespace aspect
     std::pair<std::string,std::string>
     MyPostprocessor<dim>::execute (TableHandler &statistics)
     {
-      std::unique_ptr<Function<dim> > ref_func;
+      std::unique_ptr<Function<dim>> ref_func;
       {
         const MyMaterial<dim> *
         material_model

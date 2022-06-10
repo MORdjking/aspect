@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2016 - 2020 by the authors of the ASPECT code.
+  Copyright (C) 2016 - 2022 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -38,8 +38,11 @@ namespace aspect
       Geoid ()
         :
         DataPostprocessorScalar<dim> ("geoid",
-                                      update_quadrature_points)
+                                      update_quadrature_points),
+        Interface<dim>("m")
       {}
+
+
 
       template <int dim>
       void
@@ -48,6 +51,8 @@ namespace aspect
       {
         CitationInfo::add("geoid");
       }
+
+
 
       template <int dim>
       void
@@ -101,7 +106,8 @@ namespace aspect
                                                   "geoid",
                                                   "Visualization for the geoid solution. The geoid is given "
                                                   "by the equivalent water column height due to a gravity perturbation. "
-                                                  "Units: \\si{\\meter}.")
+                                                  "\n\n"
+                                                  "Physical units: \\si{\\meter}.")
     }
   }
 }

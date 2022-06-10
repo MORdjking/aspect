@@ -115,8 +115,8 @@ namespace aspect
                                         update_gradients         | update_values |
                                         update_quadrature_points | update_JxW_values);
 
-      std::vector<std::vector<double> > composition_values (this->n_compositional_fields(),std::vector<double> (quadrature_formula.size()));
-      std::vector<Tensor<1,dim> > velocity_values(quadrature_formula.size());
+      std::vector<std::vector<double>> composition_values (this->n_compositional_fields(),std::vector<double> (quadrature_formula.size()));
+      std::vector<Tensor<1,dim>> velocity_values(quadrature_formula.size());
 
       typename DoFHandler<dim>::active_cell_iterator
       cell = this->get_dof_handler().begin_active(),
@@ -124,6 +124,7 @@ namespace aspect
 
       MaterialModel::MaterialModelInputs<dim> in(fe_face_values.n_quadrature_points, this->n_compositional_fields());
       MaterialModel::MaterialModelOutputs<dim> out(fe_face_values.n_quadrature_points, this->n_compositional_fields());
+      in.requested_properties = MaterialModel::MaterialProperties::density;
 
       // compute the integral of the viscosity. since we're on a unit box,
       // this also is the average value

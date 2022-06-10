@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2011 - 2021 by the authors of the ASPECT code.
+  Copyright (C) 2011 - 2022 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -171,7 +171,7 @@ namespace aspect
            * columns with volume fraction for each phase, this vector will be used instead of the
            * unique_phase_indices vector above.
            */
-          std::vector<std::vector<unsigned int> > global_index_of_lookup_phase;
+          std::vector<std::vector<unsigned int>> global_index_of_lookup_phase;
 
           /**
            * Compute the specific heat and thermal expansivity using the pressure

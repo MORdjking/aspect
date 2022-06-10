@@ -78,8 +78,8 @@ namespace aspect
             beta_(beta)
           {}
 
-          virtual void vector_value (const Point< dim >   &pos,
-                                     Vector< double >   &values) const
+          virtual void vector_value (const Point<dim>   &pos,
+                                     Vector<double>   &values) const
           {
             Assert (dim == 3, ExcNotImplemented());
             Assert (values.size() >= 4, ExcInternalError());
@@ -170,7 +170,7 @@ namespace aspect
         {
 
           MaterialModel::AdditionalMaterialOutputsStokesRHS<dim>
-          *force = out.template get_additional_output<MaterialModel::AdditionalMaterialOutputsStokesRHS<dim> >();
+          *force = out.template get_additional_output<MaterialModel::AdditionalMaterialOutputsStokesRHS<dim>>();
 
           for (unsigned int i=0; i < in.n_evaluation_points(); ++i)
             {
@@ -267,14 +267,6 @@ namespace aspect
         parse_parameters (ParameterHandler &prm);
 
         /**
-         * @name Reference quantities
-         * @{
-         */
-        virtual double reference_viscosity () const;
-        /**
-         * @}
-         */
-        /**
          * Returns the viscosity value in the inclusion
          */
         double get_beta() const;
@@ -284,16 +276,6 @@ namespace aspect
          */
         double beta;
     };
-
-
-
-    template <int dim>
-    double
-    BursteddeMaterial<dim>::
-    reference_viscosity () const
-    {
-      return 1.;
-    }
 
 
 
@@ -377,7 +359,7 @@ namespace aspect
     std::pair<std::string,std::string>
     BursteddePostprocessor<dim>::execute (TableHandler &statistics)
     {
-      std::unique_ptr<Function<dim> > ref_func;
+      std::unique_ptr<Function<dim>> ref_func;
       {
         const BursteddeMaterial<dim> *
         material_model

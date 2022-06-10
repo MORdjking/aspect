@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2015 - 2020 by the authors of the ASPECT code.
+ Copyright (C) 2015 - 2022 by the authors of the ASPECT code.
 
  This file is part of ASPECT.
 
@@ -39,7 +39,7 @@ namespace aspect
   {
     template <int dim>
     std::pair<std::vector<double>,std::vector<double>>
-                                                    Geoid<dim>::to_spherical_harmonic_coefficients(const std::vector<std::vector<double>> &spherical_function) const
+    Geoid<dim>::to_spherical_harmonic_coefficients(const std::vector<std::vector<double>> &spherical_function) const
     {
       std::vector<double> cosi(spherical_function.size(),0);
       std::vector<double> sini(spherical_function.size(),0);
@@ -82,7 +82,7 @@ namespace aspect
 
     template <int dim>
     std::pair<std::vector<double>,std::vector<double>>
-                                                    Geoid<dim>::density_contribution (const double &/*outer_radius*/) const
+    Geoid<dim>::density_contribution (const double &/*outer_radius*/) const
     {
       Assert(false, ExcNotImplemented());
       return std::make_pair(std::vector<double>(), std::vector<double>());
@@ -91,7 +91,7 @@ namespace aspect
 
     template <>
     std::pair<std::vector<double>,std::vector<double>>
-                                                    Geoid<3>::density_contribution (const double &outer_radius) const
+    Geoid<3>::density_contribution (const double &outer_radius) const
     {
       const unsigned int quadrature_degree = this->introspection().polynomial_degree.temperature;
 
@@ -108,8 +108,10 @@ namespace aspect
 
       MaterialModel::MaterialModelInputs<3> in(fe_values.n_quadrature_points, this->n_compositional_fields());
       MaterialModel::MaterialModelOutputs<3> out(fe_values.n_quadrature_points, this->n_compositional_fields());
+      in.requested_properties = MaterialModel::MaterialProperties::density;
 
-      std::vector<std::vector<double>> composition_values (this->n_compositional_fields(),std::vector<double> (quadrature_formula.size()));
+      std::vector<std::vector<double>>
+      composition_values(this->n_compositional_fields(), std::vector<double>(quadrature_formula.size()));
 
       // Directly do the global 3D integral over each quadrature point of every cell (different from traditional way to do layer integral).
       // This is necessary because of ASPECT's adaptive mesh refinement feature.

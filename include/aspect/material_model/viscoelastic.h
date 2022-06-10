@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2014 - 2021 by the authors of the ASPECT code.
+  Copyright (C) 2014 - 2022 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -165,15 +165,6 @@ namespace aspect
          * This model is not compressible, so this returns false.
          */
         bool is_compressible () const override;
-        /**
-         * @}
-         */
-
-        /**
-         * @name Reference quantities
-         * @{
-         */
-        double reference_viscosity () const override;
         /**
          * @}
          */

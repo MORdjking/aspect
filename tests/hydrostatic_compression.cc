@@ -25,11 +25,6 @@ namespace aspect
         return true;
       }
 
-      virtual double reference_viscosity () const
-      {
-        return 1.0;
-      }
-
       virtual void evaluate(const typename MaterialModel::Interface<dim>::MaterialModelInputs &in,
                             typename MaterialModel::Interface<dim>::MaterialModelOutputs &out) const
       {
@@ -80,8 +75,8 @@ namespace aspect
   {
     public:
       RefFunction () : Function<dim>(dim+2) {}
-      virtual void vector_value (const Point< dim >   &p,
-                                 Vector< double >   &values) const
+      virtual void vector_value (const Point<dim>   &p,
+                                 Vector<double>   &values) const
       {
         double x = p(0);
         double z = p(1);
@@ -168,8 +163,8 @@ namespace aspect
       execute (internal::Assembly::Scratch::ScratchBase<dim>   &scratch_base,
                internal::Assembly::CopyData::CopyDataBase<dim> &data_base) const
       {
-        internal::Assembly::Scratch::StokesSystem<dim> &scratch = dynamic_cast<internal::Assembly::Scratch::StokesSystem<dim>& > (scratch_base);
-        internal::Assembly::CopyData::StokesSystem<dim> &data = dynamic_cast<internal::Assembly::CopyData::StokesSystem<dim>& > (data_base);
+        internal::Assembly::Scratch::StokesSystem<dim> &scratch = dynamic_cast<internal::Assembly::Scratch::StokesSystem<dim>&> (scratch_base);
+        internal::Assembly::CopyData::StokesSystem<dim> &data = dynamic_cast<internal::Assembly::CopyData::StokesSystem<dim>&> (data_base);
 
         const Introspection<dim> &introspection = this->introspection();
         const FiniteElement<dim> &fe = this->get_fe();
@@ -261,7 +256,7 @@ namespace aspect
   {
 
     Assemblers::Interface<dim> *assembler = new ForceAssembler<dim>();
-    assemblers.stokes_system.push_back(std::unique_ptr<Assemblers::Interface<dim> >(assembler));
+    assemblers.stokes_system.push_back(std::unique_ptr<Assemblers::Interface<dim>>(assembler));
   }
 }
 

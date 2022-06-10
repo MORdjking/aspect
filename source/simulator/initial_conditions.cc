@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2011 - 2020 by the authors of the ASPECT code.
+  Copyright (C) 2011 - 2022 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -79,7 +79,7 @@ namespace aspect
 
         // get the temperature/composition support points
         const std::vector<Point<dim>> support_points
-                                   = finite_element.base_element(base_element).get_unit_support_points();
+          = finite_element.base_element(base_element).get_unit_support_points();
         Assert (support_points.size() != 0,
                 ExcInternalError());
 
@@ -250,7 +250,7 @@ namespace aspect
 
     // get the temperature/composition support points
     const std::vector<Point<dim>> support_points
-                               = finite_element.base_element(base_element).get_unit_support_points();
+      = finite_element.base_element(base_element).get_unit_support_points();
     Assert (support_points.size() != 0,
             ExcInternalError());
 
@@ -411,8 +411,7 @@ namespace aspect
         LinearAlgebra::BlockVector system_tmp;
         system_tmp.reinit (system_rhs);
 
-        const QGauss<dim> quadrature(parameters.stokes_velocity_degree+1);
-
+        const Quadrature<dim> &quadrature = introspection.quadratures.velocities;
         Utilities::project_cellwise<dim,LinearAlgebra::BlockVector>(*mapping,
                                                                     dof_handler,
                                                                     introspection.component_indices.pressure,

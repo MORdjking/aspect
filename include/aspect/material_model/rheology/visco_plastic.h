@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2020 - 2021 by the authors of the ASPECT code.
+  Copyright (C) 2020 - 2022 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -182,11 +182,6 @@ namespace aspect
                                      const std::vector<double> &phase_function_values = std::vector<double>(),
                                      const std::vector<unsigned int> &n_phases_per_composition = std::vector<unsigned int>()) const;
 
-
-          /**
-           * Reference viscosity used by material models using this rheology.
-           */
-          double ref_visc;
 
           /**
            * Minimum strain rate used to stabilize the strain rate dependent rheology.

@@ -69,8 +69,8 @@ namespace aspect
       {
         public:
           FunctionInclusion (double eta_B) : Function<dim>(dim+2), eta_B_(eta_B) {}
-          virtual void vector_value (const Point< dim >   &p,
-                                     Vector< double >   &values) const
+          virtual void vector_value (const Point<dim>   &p,
+                                     Vector<double>   &values) const
           {
             double pos[2]= {p(0),p(1)};
             AnalyticSolutions::_Inclusion
@@ -214,14 +214,6 @@ namespace aspect
 
 
         /**
-         * @name Reference quantities
-         * @{
-         */
-        virtual double reference_viscosity () const;
-        /**
-         * @}
-         */
-        /**
          * Returns the viscosity value in the inclusion
          */
         double get_eta_B() const;
@@ -232,15 +224,6 @@ namespace aspect
          */
         double eta_B;
     };
-
-    template <int dim>
-    double
-    InclusionMaterial<dim>::
-    reference_viscosity () const
-    {
-      return 1;
-    }
-
 
     template <int dim>
     bool
@@ -339,7 +322,7 @@ namespace aspect
     std::pair<std::string,std::string>
     InclusionPostprocessor<dim>::execute (TableHandler &statistics)
     {
-      std::unique_ptr<Function<dim> > ref_func;
+      std::unique_ptr<Function<dim>> ref_func;
       if (dynamic_cast<const InclusionMaterial<dim> *>(&this->get_material_model()) != nullptr)
         {
           const InclusionMaterial<dim> *

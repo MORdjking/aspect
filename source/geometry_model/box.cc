@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2011 - 2020 by the authors of the ASPECT code.
+  Copyright (C) 2011 - 2022 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -75,7 +75,7 @@ namespace aspect
 
       // Tell p4est about the periodicity of the mesh.
       std::vector<GridTools::PeriodicFacePair<typename parallel::distributed::Triangulation<dim>::cell_iterator>>
-          periodicity_vector;
+      periodicity_vector;
       for (int i=0; i<dim; ++i)
         if (periodic[i])
           GridTools::collect_periodic_faces
@@ -183,11 +183,11 @@ namespace aspect
 
 
     template <int dim>
-    std::set< std::pair< std::pair<types::boundary_id, types::boundary_id>, unsigned int>>
-        Box<dim>::
-        get_periodic_boundary_pairs () const
+    std::set<std::pair<std::pair<types::boundary_id, types::boundary_id>, unsigned int>>
+    Box<dim>::
+    get_periodic_boundary_pairs () const
     {
-      std::set< std::pair< std::pair<types::boundary_id, types::boundary_id>, unsigned int>> periodic_boundaries;
+      std::set<std::pair<std::pair<types::boundary_id, types::boundary_id>, unsigned int>> periodic_boundaries;
       for ( unsigned int i=0; i<dim; ++i)
         if (periodic[i])
           periodic_boundaries.insert( std::make_pair( std::pair<types::boundary_id, types::boundary_id>(2*i, 2*i+1), i) );

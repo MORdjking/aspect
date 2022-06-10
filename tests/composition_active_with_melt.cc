@@ -21,11 +21,6 @@ namespace aspect
         return false;
       }
 
-      virtual double reference_viscosity () const
-      {
-        return 0.2;
-      }
-
       virtual double reference_darcy_coefficient () const
       {
         return 1.0;
@@ -68,7 +63,7 @@ namespace aspect
           }
 
         // fill melt outputs if they exist
-        aspect::MaterialModel::MeltOutputs<dim> *melt_out = out.template get_additional_output<aspect::MaterialModel::MeltOutputs<dim> >();
+        aspect::MaterialModel::MeltOutputs<dim> *melt_out = out.template get_additional_output<aspect::MaterialModel::MeltOutputs<dim>>();
 
         if (melt_out != nullptr)
           {

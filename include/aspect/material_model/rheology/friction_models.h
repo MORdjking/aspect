@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2019 by the authors of the ASPECT code.
+  Copyright (C) 2019 - 2022 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -121,7 +121,7 @@ namespace aspect
            * Parsed functions that specify the friction angle which must be
            * given in the input file using the function method.
            */
-          std::unique_ptr<Functions::ParsedFunction<dim> > friction_function;
+          std::unique_ptr<Functions::ParsedFunction<dim>> friction_function;
 
           /**
            * The coordinate representation to evaluate the function for the friction angle.

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2011 - 2018 by the authors of the ASPECT code.
+  Copyright (C) 2011 - 2022 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -42,7 +42,7 @@ namespace aspect
    */
   template <int dim>
   std::vector<VariableDeclaration<dim>>
-                                     construct_default_variables (const Parameters<dim> &parameters);
+  construct_default_variables (const Parameters<dim> &parameters);
 
 
 
@@ -235,6 +235,7 @@ namespace aspect
       struct Quadratures
       {
         Quadrature<dim>       velocities;
+        Quadrature<dim>       pressure;
         Quadrature<dim>       temperature;
         Quadrature<dim>       compositional_fields;
         Quadrature<dim>       system;
@@ -256,6 +257,7 @@ namespace aspect
       struct FaceQuadratures
       {
         Quadrature<dim-1>       velocities;
+        Quadrature<dim-1>       pressure;
         Quadrature<dim-1>       temperature;
         Quadrature<dim-1>       compositional_fields;
         Quadrature<dim-1>       system;

@@ -87,8 +87,6 @@ namespace aspect
          */
         virtual bool is_compressible () const;
 
-        virtual double reference_viscosity () const;
-
         virtual double reference_density () const;
 
         static
@@ -245,7 +243,7 @@ namespace aspect
     {
       //set up additional output for the derivatives
       MaterialModelDerivatives<dim> *derivatives;
-      derivatives = out.template get_additional_output<MaterialModelDerivatives<dim> >();
+      derivatives = out.template get_additional_output<MaterialModelDerivatives<dim>>();
 
       for (unsigned int i=0; i < in.n_evaluation_points(); ++i)
         {
@@ -289,7 +287,7 @@ namespace aspect
               // this material model (a general powerlaw) we do not need to worry about how to
               // distribute the strain-rate and stress over the processes.
               std::vector<double> composition_viscosities(volume_fractions.size());
-              std::vector<SymmetricTensor<2,dim> > composition_viscosities_derivatives(volume_fractions.size());
+              std::vector<SymmetricTensor<2,dim>> composition_viscosities_derivatives(volume_fractions.size());
               std::vector<double> composition_dviscosities_dpressure(volume_fractions.size());
 
               const SymmetricTensor<2,dim> edot = use_deviator_of_strain_rate ? deviator(in.strain_rate[i]) : in.strain_rate[i];
@@ -434,14 +432,6 @@ namespace aspect
           for (unsigned int c=0; c < in.composition[i].size(); ++c)
             out.reaction_terms[i][c] = 0.0;
         }
-    }
-
-    template <int dim>
-    double
-    SpiegelmanMaterial<dim>::
-    reference_viscosity () const
-    {
-      return ref_visc;
     }
 
     template <int dim>

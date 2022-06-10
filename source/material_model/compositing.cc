@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2011 - 2021 by the authors of the ASPECT code.
+  Copyright (C) 2011 - 2022 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -221,17 +221,6 @@ namespace aspect
     {
       const unsigned int ind = model_property_map.find(Property::compressibility)->second;
       return models[ind]->is_compressible();
-    }
-
-
-
-    template <int dim>
-    double
-    Compositing<dim>::
-    reference_viscosity() const
-    {
-      const unsigned int ind = model_property_map.at(Property::viscosity);
-      return models[ind]->reference_viscosity();
     }
   }
 }

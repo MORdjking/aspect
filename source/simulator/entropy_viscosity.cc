@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2016 - 2021 by the authors of the ASPECT code.
+  Copyright (C) 2016 - 2022 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -141,7 +141,7 @@ namespace aspect
           residual[j] += new_residual[j];
 
         if (auto *stabilization_assembler =
-              dynamic_cast<Assemblers::AdvectionStabilizationInterface<dim>* > ((assemblers->advection_system[i]).get()))
+              dynamic_cast<Assemblers::AdvectionStabilizationInterface<dim>*> ((assemblers->advection_system[i]).get()))
           {
             // Ensure no other assembler has set max_advection_prefactor or max_conductivity before,
             // otherwise we dont know which one to use.
@@ -703,7 +703,7 @@ namespace aspect
                                                           const bool skip_interior_cells) const; \
   template void Simulator<dim>::get_artificial_viscosity (Vector<float> &viscosity_per_cell,  \
                                                           const AdvectionField &advection_field, \
-                                                          const bool skip_interior_cells) const; \
+                                                          const bool skip_interior_cells) const;
 
 
   ASPECT_INSTANTIATE(INSTANTIATE)

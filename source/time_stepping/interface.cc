@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2019 - 2020 by the authors of the ASPECT code.
+  Copyright (C) 2019 - 2022 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -392,10 +392,10 @@ namespace aspect
     {
       template <>
       std::list<internal::Plugins::PluginList<TimeStepping::Interface<2>>::PluginInfo> *
-                                                                       internal::Plugins::PluginList<TimeStepping::Interface<2>>::plugins = nullptr;
+      internal::Plugins::PluginList<TimeStepping::Interface<2>>::plugins = nullptr;
       template <>
       std::list<internal::Plugins::PluginList<TimeStepping::Interface<3>>::PluginInfo> *
-                                                                       internal::Plugins::PluginList<TimeStepping::Interface<3>>::plugins = nullptr;
+      internal::Plugins::PluginList<TimeStepping::Interface<3>>::plugins = nullptr;
     }
   }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2011 - 2020 by the authors of the ASPECT code.
+  Copyright (C) 2011 - 2022 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -78,6 +78,28 @@ namespace aspect
                         std::vector<double> &output) override
         {
           output = out.viscosities;
+        }
+    };
+
+
+
+    template <int dim>
+    class FunctorDepthAverageLogViscosity: public internal::FunctorBase<dim>
+    {
+      public:
+        bool need_material_properties() const override
+        {
+          return true;
+        }
+
+        void operator()(const MaterialModel::MaterialModelInputs<dim> &,
+                        const MaterialModel::MaterialModelOutputs<dim> &out,
+                        const FEValues<dim> &,
+                        const LinearAlgebra::BlockVector &,
+                        std::vector<double> &output) override
+        {
+          for (unsigned i = 0; i < out.viscosities.size(); i++)
+            output[i] = std::log10 (out.viscosities[i]);
         }
     };
 
@@ -473,8 +495,8 @@ namespace aspect
 
   template <int dim>
   std::vector<std::vector<double>>
-                                LateralAveraging<dim>::compute_lateral_averages(const std::vector<double> &depth_bounds,
-                                                                                std::vector<std::unique_ptr<internal::FunctorBase<dim>>> &functors) const
+  LateralAveraging<dim>::compute_lateral_averages(const std::vector<double> &depth_bounds,
+                                                  std::vector<std::unique_ptr<internal::FunctorBase<dim>>> &functors) const
   {
     Assert (functors.size() > 0,
             ExcMessage ("To call this function, you need to request a positive "
@@ -490,7 +512,7 @@ namespace aspect
     const unsigned int n_slices = depth_bounds.size()-1;
 
     std::vector<std::vector<double>> values(n_properties,
-                                            std::vector<double>(n_slices,0.0));
+                                             std::vector<double>(n_slices,0.0));
     std::vector<double> volume(n_slices,0.0);
 
     // We would like to use a quadrature formula that is appropriately accurate laterally,
@@ -527,7 +549,7 @@ namespace aspect
     std::unique_ptr<Quadrature<dim>> quadrature_formula;
     if (geometry_unique_depth_direction != numbers::invalid_unsigned_int)
       quadrature_formula = std::make_unique<Quadrature<dim>>(internal::get_quadrature_formula<dim>(lateral_quadrature_degree,
-                                                             geometry_unique_depth_direction));
+                                                              geometry_unique_depth_direction));
     else
       quadrature_formula = std::make_unique<Quadrature<dim>>(QIterated<dim>(QMidpoint<1>(),10));
 
@@ -539,9 +561,9 @@ namespace aspect
                              update_values | update_gradients | update_quadrature_points | update_JxW_values);
 
     std::vector<std::vector<double>> composition_values (this->n_compositional_fields(),
-                                                         std::vector<double> (n_q_points));
+                                                          std::vector<double> (n_q_points));
     std::vector<std::vector<double>> output_values(n_properties,
-                                                   std::vector<double>(n_q_points));
+                                                    std::vector<double>(n_q_points));
 
     MaterialModel::MaterialModelInputs<dim> in(n_q_points,
                                                this->n_compositional_fields());
@@ -670,6 +692,14 @@ namespace aspect
 
 
   template <int dim>
+  void LateralAveraging<dim>::get_log_viscosity_averages(std::vector<double> &values) const
+  {
+    values = compute_lateral_averages(values.size(),
+                                      std::vector<std::string>(1,"log_viscosity"))[0];
+  }
+
+
+  template <int dim>
   void LateralAveraging<dim>::get_velocity_magnitude_averages(std::vector<double> &values) const
   {
     values = compute_lateral_averages(values.size(),
@@ -734,8 +764,8 @@ namespace aspect
 
   template <int dim>
   std::vector<std::vector<double>>
-                                LateralAveraging<dim>::get_averages(const unsigned int n_slices,
-                                                                    const std::vector<std::string> &property_names) const
+  LateralAveraging<dim>::get_averages(const unsigned int n_slices,
+                                      const std::vector<std::string> &property_names) const
   {
     return compute_lateral_averages(n_slices, property_names);
   }
@@ -744,8 +774,8 @@ namespace aspect
 
   template <int dim>
   std::vector<std::vector<double>>
-                                LateralAveraging<dim>::compute_lateral_averages(const unsigned int n_slices,
-                                                                                const std::vector<std::string> &property_names) const
+  LateralAveraging<dim>::compute_lateral_averages(const unsigned int n_slices,
+                                                  const std::vector<std::string> &property_names) const
   {
     const double maximal_depth = this->get_geometry_model().maximal_depth();
     std::vector<double> depth_bounds(n_slices+1, 0.0);
@@ -761,8 +791,8 @@ namespace aspect
 
   template <int dim>
   std::vector<std::vector<double>>
-                                LateralAveraging<dim>::compute_lateral_averages(const std::vector<double> &depth_thresholds,
-                                                                                const std::vector<std::string> &property_names) const
+  LateralAveraging<dim>::compute_lateral_averages(const std::vector<double> &depth_thresholds,
+                                                  const std::vector<std::string> &property_names) const
   {
     std::vector<std::unique_ptr<internal::FunctorBase<dim>>> functors;
     for (unsigned int property_index=0; property_index<property_names.size(); ++property_index)
@@ -811,6 +841,10 @@ namespace aspect
         else if (property_names[property_index] == "viscosity")
           {
             functors.push_back(std::make_unique<FunctorDepthAverageViscosity<dim>>());
+          }
+        else if (property_names[property_index] == "log_viscosity")
+          {
+            functors.push_back(std::make_unique<FunctorDepthAverageLogViscosity<dim>>());
           }
         else if (property_names[property_index] == "vertical_heat_flux")
           {

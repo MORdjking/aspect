@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2014 - 2020 by the authors of the ASPECT code.
+  Copyright (C) 2014 - 2022 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -42,6 +42,7 @@ namespace aspect
       {
         std::vector<std::string> names;
         names.emplace_back("dislocation_viscosity");
+        names.emplace_back("diffusion_viscosity");
         names.emplace_back("boundary_area_change_work_fraction");
         return names;
       }
@@ -54,6 +55,7 @@ namespace aspect
       :
       NamedAdditionalMaterialOutputs<dim>(make_dislocation_viscosity_outputs_names()),
       dislocation_viscosities(n_points, numbers::signaling_nan<double>()),
+      diffusion_viscosities(n_points, numbers::signaling_nan<double>()),
       boundary_area_change_work_fractions(n_points, numbers::signaling_nan<double>())
     {}
 
@@ -70,6 +72,9 @@ namespace aspect
             return dislocation_viscosities;
 
           case 1:
+            return diffusion_viscosities;
+
+          case 2:
             return boundary_area_change_work_fractions;
 
           default:
@@ -184,7 +189,7 @@ namespace aspect
       // get grain size and limit it to a global minimum
       const unsigned int grain_size_index = this->introspection().compositional_index_for_name("grain_size");
       double grain_size = composition[grain_size_index];
-      grain_size = std::max(std::exp(-grain_size),min_grain_size);
+      grain_size = std::max(std::exp(-grain_size), min_grain_size);
 
       composition[grain_size_index] = grain_size;
     }
@@ -246,7 +251,7 @@ namespace aspect
 
           // grain size reduction in dislocation creep regime
           const SymmetricTensor<2,dim> shear_strain_rate = strain_rate - 1./dim * trace(strain_rate) * unit_symmetric_tensor<dim>();
-          const double second_strain_rate_invariant = std::sqrt(std::abs(second_invariant(shear_strain_rate)));
+          const double second_strain_rate_invariant = std::sqrt(std::max(-second_invariant(shear_strain_rate), 0.));
 
           const double current_diffusion_viscosity   = diffusion_viscosity(temperature, pressure, current_composition, strain_rate, position);
           current_dislocation_viscosity              = dislocation_viscosity(temperature, pressure, current_composition, strain_rate, position, current_dislocation_viscosity);
@@ -336,7 +341,7 @@ namespace aspect
                          const Point<dim>             &position) const
     {
       const SymmetricTensor<2,dim> shear_strain_rate = strain_rate - 1./dim * trace(strain_rate) * unit_symmetric_tensor<dim>();
-      const double second_strain_rate_invariant = std::sqrt(std::abs(second_invariant(shear_strain_rate)));
+      const double second_strain_rate_invariant = std::sqrt(std::max(-second_invariant(shear_strain_rate), 0.));
 
       const double grain_size = composition[this->introspection().compositional_index_for_name("grain_size")];
 
@@ -430,7 +435,7 @@ namespace aspect
                                              const Point<dim> &position) const
     {
       const SymmetricTensor<2,dim> shear_strain_rate = dislocation_strain_rate - 1./dim * trace(dislocation_strain_rate) * unit_symmetric_tensor<dim>();
-      const double second_strain_rate_invariant = std::sqrt(std::abs(second_invariant(shear_strain_rate)));
+      const double second_strain_rate_invariant = std::sqrt(std::max(-second_invariant(shear_strain_rate), 0.));
 
       // Currently this will never be called without adiabatic_conditions initialized, but just in case
       const double adiabatic_pressure = this->get_adiabatic_conditions().is_initialized()
@@ -479,7 +484,7 @@ namespace aspect
                const Point<dim> &position) const
     {
       const SymmetricTensor<2,dim> shear_strain_rate = strain_rate - 1./dim * trace(strain_rate) * unit_symmetric_tensor<dim>();
-      const double second_strain_rate_invariant = std::sqrt(std::abs(second_invariant(shear_strain_rate)));
+      const double second_strain_rate_invariant = std::sqrt(std::max(-second_invariant(shear_strain_rate), 0.));
 
       const double diff_viscosity = diffusion_viscosity(temperature, pressure, composition, strain_rate, position);
 
@@ -565,16 +570,6 @@ namespace aspect
             vs += compositional_fields[i] * material_lookup[i]->seismic_Vs(temperature,pressure);
         }
       return vs;
-    }
-
-
-
-    template <int dim>
-    double
-    GrainSize<dim>::
-    reference_viscosity () const
-    {
-      return eta;
     }
 
 
@@ -821,7 +816,7 @@ namespace aspect
                 double pressure_deviation = pressure - transition_pressure
                                             - transition_slopes[phase] * (in.temperature[i] - transition_temperatures[phase]);
 
-                // If we are close to the the phase boundary (pressure difference
+                // If we are close to the phase boundary (pressure difference
                 // is smaller than phase boundary width), and the velocity points
                 // away from the phase transition the material has crossed the transition.
                 if ((std::abs(pressure_deviation) < pressure_width)
@@ -846,7 +841,7 @@ namespace aspect
               double disl_viscosity = std::numeric_limits<double>::max();
 
               const SymmetricTensor<2,dim> shear_strain_rate = in.strain_rate[i] - 1./dim * trace(in.strain_rate[i]) * unit_symmetric_tensor<dim>();
-              const double second_strain_rate_invariant = std::sqrt(std::abs(second_invariant(shear_strain_rate)));
+              const double second_strain_rate_invariant = std::sqrt(std::max(-second_invariant(shear_strain_rate), 0.));
 
               const double diff_viscosity = diffusion_viscosity(in.temperature[i], pressure, composition, in.strain_rate[i], in.position[i]);
 
@@ -861,7 +856,10 @@ namespace aspect
               out.viscosities[i] = std::min(std::max(min_eta,effective_viscosity),max_eta);
 
               if (DislocationViscosityOutputs<dim> *disl_viscosities_out = out.template get_additional_output<DislocationViscosityOutputs<dim>>())
-                disl_viscosities_out->dislocation_viscosities[i] = std::min(std::max(min_eta,disl_viscosity),1e300);
+                {
+                  disl_viscosities_out->dislocation_viscosities[i] = std::min(std::max(min_eta,disl_viscosity),1e300);
+                  disl_viscosities_out->diffusion_viscosities[i] = std::min(std::max(min_eta,diff_viscosity),1e300);
+                }
             }
 
           out.densities[i] = density(in.temperature[i], pressure, in.composition[i], in.position[i]);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2016 - 2020 by the authors of the ASPECT code.
+  Copyright (C) 2016 - 2022 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -61,8 +61,8 @@ namespace aspect
 
       // evaluate the solution at all of our evaluation points
       std::vector<Vector<double>>
-                               current_point_values (evaluation_points_cartesian.size(),
-                                                     Vector<double> (this->introspection().n_components));
+      current_point_values (evaluation_points_cartesian.size(),
+                            Vector<double> (this->introspection().n_components));
 
       for (unsigned int p=0; p<evaluation_points_cartesian.size(); ++p)
         {

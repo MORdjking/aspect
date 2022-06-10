@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2011 - 2017 by the authors of the ASPECT code.
+  Copyright (C) 2011 - 2021 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -37,7 +37,8 @@ namespace aspect
         // in order to determine the partition number. thus, no
         // need to specify any update flags
         DataPostprocessorScalar<dim> ("partition",
-                                      update_default)
+                                      update_default),
+        Interface<dim>("")  // no physical units
       {}
 
 
@@ -72,7 +73,9 @@ namespace aspect
                                                   "partition",
                                                   "A visualization output object that generates output "
                                                   "for the parallel partition that every cell of the "
-                                                  "mesh is associated with.")
+                                                  "mesh is associated with."
+                                                  "\n\n"
+                                                  "Physical units: None.")
     }
   }
 }

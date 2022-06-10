@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2011 - 2021 by the authors of the ASPECT code.
+  Copyright (C) 2011 - 2022 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -80,11 +80,11 @@ namespace aspect
      */
     template <int dim>
     std::vector<VariableDeclaration<dim>> construct_variables(const Parameters<dim> &parameters,
-                                                              SimulatorSignals<dim> &signals,
-                                                              std::unique_ptr<MeltHandler<dim>> &melt_handler)
+                                                               SimulatorSignals<dim> &signals,
+                                                               std::unique_ptr<MeltHandler<dim>> &melt_handler)
     {
       std::vector<VariableDeclaration<dim>> variables
-                                         = construct_default_variables (parameters);
+        = construct_default_variables (parameters);
       if (melt_handler)
         melt_handler->edit_finite_element_variables (parameters, variables);
 
@@ -103,8 +103,8 @@ namespace aspect
      */
     template <int dim>
     std::unique_ptr<Mapping<dim>>
-                               construct_mapping(const GeometryModel::Interface<dim> &geometry_model,
-                                                 const InitialTopographyModel::Interface<dim> &initial_topography_model)
+    construct_mapping(const GeometryModel::Interface<dim> &geometry_model,
+                      const InitialTopographyModel::Interface<dim> &initial_topography_model)
     {
       if (geometry_model.has_curved_elements())
         return std::make_unique<MappingQCache<dim>>(4);
@@ -477,7 +477,7 @@ namespace aspect
 
     // Make sure that we do the pressure right-hand side modification correctly for periodic boundaries
     using periodic_boundary_set
-      = std::set< std::pair< std::pair< types::boundary_id, types::boundary_id>, unsigned int>>;
+      = std::set<std::pair<std::pair<types::boundary_id, types::boundary_id>, unsigned int>>;
     periodic_boundary_set pbs = geometry_model->get_periodic_boundary_pairs();
     for (periodic_boundary_set::iterator p = pbs.begin(); p != pbs.end(); ++p)
       {
@@ -867,6 +867,7 @@ namespace aspect
             {
               case Parameters<dim>::AdvectionFieldMethod::fem_field:
               case Parameters<dim>::AdvectionFieldMethod::fem_melt_field:
+              case Parameters<dim>::AdvectionFieldMethod::fem_darcy_field:
               case Parameters<dim>::AdvectionFieldMethod::prescribed_field_with_diffusion:
                 return true;
               case Parameters<dim>::AdvectionFieldMethod::particles:
@@ -1551,7 +1552,7 @@ namespace aspect
     // run all the postprocessing routines and then write
     // the current state of the statistics table to a file
     std::list<std::pair<std::string,std::string>>
-                                               output_list = postprocess_manager.execute (statistics);
+    output_list = postprocess_manager.execute (statistics);
 
     // if we are on processor zero, print to screen
     // whatever the postprocessors have generated
@@ -1589,7 +1590,7 @@ namespace aspect
     system_trans(dof_handler);
 
     std::unique_ptr<parallel::distributed::SolutionTransfer<dim,LinearAlgebra::Vector>>
-        mesh_deformation_trans;
+    mesh_deformation_trans;
 
     {
       TimerOutput::Scope timer (computing_timer, "Refine mesh structure, part 1");
@@ -1694,7 +1695,7 @@ namespace aspect
         };
 
         GridTools::exchange_cell_data_to_ghosts<unsigned int, DoFHandler<dim>>
-                                                                            (dof_handler, pack, unpack);
+        (dof_handler, pack, unpack);
 
       }
       triangulation.prepare_coarsening_and_refinement();

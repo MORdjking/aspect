@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2011 - 2021 by the authors of the ASPECT code.
+  Copyright (C) 2011 - 2022 by the authors of the ASPECT code.
 
  This file is part of ASPECT.
 
@@ -145,13 +145,13 @@ namespace aspect
 
       template <int dim>
       const std::vector<DataOutBase::Patch<0,dim>> &
-                                                ParticleOutput<dim>::get_patches () const
+      ParticleOutput<dim>::get_patches () const
       {
         return patches;
       }
 
       template <int dim>
-      std::vector< std::string >
+      std::vector<std::string>
       ParticleOutput<dim>::get_dataset_names () const
       {
         return dataset_names;
@@ -289,7 +289,7 @@ namespace aspect
 
       DataOutBase::write_pvd_record (pvd_master, times_and_pvtu_file_names);
 
-      // finally, do the same for Visit via the .visit file for this
+      // finally, do the same for VisIt via the .visit file for this
       // time step, as well as for all time steps together
       const std::string
       visit_master_filename = (this->get_output_directory()

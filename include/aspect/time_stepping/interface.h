@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2019 - 2020 by the authors of the ASPECT code.
+  Copyright (C) 2019 - 2022 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -320,11 +320,11 @@ namespace aspect
   namespace ASPECT_REGISTER_TIME_STEPPING_MODEL_ ## classname \
   { \
     aspect::internal::Plugins::RegisterHelper<aspect::TimeStepping::Interface<2>,classname<2>> \
-        dummy_ ## classname ## _2d (&aspect::TimeStepping::Manager<2>::register_time_stepping_model, \
-                                    name, description); \
+    dummy_ ## classname ## _2d (&aspect::TimeStepping::Manager<2>::register_time_stepping_model, \
+                                name, description); \
     aspect::internal::Plugins::RegisterHelper<aspect::TimeStepping::Interface<3>,classname<3>> \
-        dummy_ ## classname ## _3d (&aspect::TimeStepping::Manager<3>::register_time_stepping_model, \
-                                    name, description); \
+    dummy_ ## classname ## _3d (&aspect::TimeStepping::Manager<3>::register_time_stepping_model, \
+                                name, description); \
   }
 
   }

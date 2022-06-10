@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2014 - 2020 by the authors of the ASPECT code.
+  Copyright (C) 2014 - 2022 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -56,6 +56,13 @@ namespace aspect
         std::vector<double> dislocation_viscosities;
 
         /**
+         * Diffusion viscosities at the evaluation points passed to
+         * the instance of MaterialModel::Interface::evaluate() that fills
+         * the current object.
+         */
+        std::vector<double> diffusion_viscosities;
+
+        /**
          * This contains the fraction of the deformation work that is
          * converted to surface energy of grains instead of thermal energy.
          * It is used to reduce the shear heating by this fraction. If it
@@ -107,8 +114,6 @@ namespace aspect
          * or as $\nabla \cdot \mathbf{u}=0$ (incompressible Stokes).
          */
         bool is_compressible () const override;
-
-        double reference_viscosity () const override;
 
         void evaluate(const typename Interface<dim>::MaterialModelInputs &in,
                       typename Interface<dim>::MaterialModelOutputs &out) const override;

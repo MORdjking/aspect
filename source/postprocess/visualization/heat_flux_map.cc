@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2011 - 2020 by the authors of the ASPECT code.
+  Copyright (C) 2011 - 2021 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -38,7 +38,8 @@ namespace aspect
       HeatFluxMap ()
         :
         DataPostprocessorScalar<dim> ("heat_flux_map",
-                                      update_quadrature_points)
+                                      update_quadrature_points),
+        Interface<dim>("W/m/m")
       {}
 
 
@@ -199,7 +200,9 @@ namespace aspect
                                                   "boundaries is of interest, the "
                                                   "postprocessor can produce output of higher resolution "
                                                   "by evaluating the CBF solution vector point-wise "
-                                                  "instead of computing cell-wise averaged values.")
+                                                  "instead of computing cell-wise averaged values."
+                                                  "\n\n"
+                                                  "Physical units: \\si{\\watt\\per\\meter\\squared}.")
     }
   }
 }

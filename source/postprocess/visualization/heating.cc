@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2011 - 2020 by the authors of the ASPECT code.
+  Copyright (C) 2011 - 2022 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -38,8 +38,11 @@ namespace aspect
       Heating<dim>::
       Heating ()
         :
-        DataPostprocessor<dim> ()
+        DataPostprocessor<dim> (),
+        Interface<dim>("W/m/m/m")
       {}
+
+
 
       template <int dim>
       std::vector<std::string>
@@ -55,6 +58,8 @@ namespace aspect
         return names;
       }
 
+
+
       template <int dim>
       std::vector<DataComponentInterpretation::DataComponentInterpretation>
       Heating<dim>::
@@ -65,6 +70,8 @@ namespace aspect
                 DataComponentInterpretation::component_is_scalar);
       }
 
+
+
       template <int dim>
       UpdateFlags
       Heating<dim>::
@@ -72,6 +79,8 @@ namespace aspect
       {
         return update_gradients | update_values  | update_quadrature_points | update_JxW_values;
       }
+
+
 
       template <int dim>
       void
@@ -171,7 +180,9 @@ namespace aspect
       ASPECT_REGISTER_VISUALIZATION_POSTPROCESSOR(Heating,
                                                   "heating",
                                                   "A visualization output object that generates output "
-                                                  "for all the heating terms used in the energy equation.")
+                                                  "for all the heating terms used in the energy equation."
+                                                  "\n\n"
+                                                  "Physical units: \\si{\\watt\\per\\cubic\\meter}.")
     }
   }
 }

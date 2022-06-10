@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2011 - 2020 by the authors of the ASPECT code.
+  Copyright (C) 2011 - 2022 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -305,8 +305,8 @@ namespace aspect
          * specifically use a geometry model with periodic boundary conditions
          */
         virtual
-        std::set< std::pair< std::pair<types::boundary_id, types::boundary_id>, unsigned int>>
-            get_periodic_boundary_pairs () const;
+        std::set<std::pair<std::pair<types::boundary_id, types::boundary_id>, unsigned int>>
+        get_periodic_boundary_pairs () const;
 
         /**
          * Adjust positions to be inside the domain considering periodic boundary conditions.
@@ -454,11 +454,11 @@ namespace aspect
   namespace ASPECT_REGISTER_GEOMETRY_MODEL_ ## classname \
   { \
     aspect::internal::Plugins::RegisterHelper<aspect::GeometryModel::Interface<2>,classname<2>> \
-        dummy_ ## classname ## _2d (&aspect::GeometryModel::register_geometry_model<2>, \
-                                    name, description); \
+    dummy_ ## classname ## _2d (&aspect::GeometryModel::register_geometry_model<2>, \
+                                name, description); \
     aspect::internal::Plugins::RegisterHelper<aspect::GeometryModel::Interface<3>,classname<3>> \
-        dummy_ ## classname ## _3d (&aspect::GeometryModel::register_geometry_model<3>, \
-                                    name, description); \
+    dummy_ ## classname ## _3d (&aspect::GeometryModel::register_geometry_model<3>, \
+                                name, description); \
   }
   }
 }

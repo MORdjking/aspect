@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2011 - 2017 by the authors of the ASPECT code.
+  Copyright (C) 2011 - 2022 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -174,11 +174,11 @@ namespace aspect
   namespace ASPECT_REGISTER_GRAVITY_MODEL_ ## classname \
   { \
     aspect::internal::Plugins::RegisterHelper<aspect::GravityModel::Interface<2>,classname<2>> \
-        dummy_ ## classname ## _2d (&aspect::GravityModel::register_gravity_model<2>, \
-                                    name, description); \
+    dummy_ ## classname ## _2d (&aspect::GravityModel::register_gravity_model<2>, \
+                                name, description); \
     aspect::internal::Plugins::RegisterHelper<aspect::GravityModel::Interface<3>,classname<3>> \
-        dummy_ ## classname ## _3d (&aspect::GravityModel::register_gravity_model<3>, \
-                                    name, description); \
+    dummy_ ## classname ## _3d (&aspect::GravityModel::register_gravity_model<3>, \
+                                name, description); \
   }
   }
 }

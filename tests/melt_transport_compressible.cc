@@ -28,11 +28,6 @@ namespace aspect
         return true;
       }
 
-      virtual double reference_viscosity () const
-      {
-        return 1.0;
-      }
-
       virtual double reference_darcy_coefficient () const
       {
         const double permeability = K_D_0 + 2.0 * B / E - rho_s_0 * B * D / E * (1.0/rho_s_0 - 1.0/rho_f_0) * std::exp(0.5);
@@ -56,7 +51,7 @@ namespace aspect
           }
 
         // fill melt outputs if they exist
-        aspect::MaterialModel::MeltOutputs<dim> *melt_out = out.template get_additional_output<aspect::MaterialModel::MeltOutputs<dim> >();
+        aspect::MaterialModel::MeltOutputs<dim> *melt_out = out.template get_additional_output<aspect::MaterialModel::MeltOutputs<dim>>();
 
         if (melt_out != nullptr)
           {
@@ -116,8 +111,8 @@ namespace aspect
   {
     public:
       RefFunction () : Function<dim>(2*dim+5) {}
-      virtual void vector_value (const Point< dim >   &p,
-                                 Vector< double >   &values) const
+      virtual void vector_value (const Point<dim>   &p,
+                                 Vector<double>   &values) const
       {
         const double x = p(0);
         const double y = p(1);
@@ -305,7 +300,7 @@ namespace aspect
         const types::boundary_id,
         const MaterialModel::MaterialModelInputs<dim> &material_model_inputs,
         const MaterialModel::MaterialModelOutputs<dim> &,
-        const std::vector<Tensor<1,dim> > &normal_vectors,
+        const std::vector<Tensor<1,dim>> &normal_vectors,
         std::vector<double> &output
       ) const
       {

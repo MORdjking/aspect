@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2015 - 2021 by the authors of the ASPECT code.
+  Copyright (C) 2015 - 2022 by the authors of the ASPECT code.
 
  This file is part of ASPECT.
 
@@ -29,9 +29,9 @@ namespace aspect
     {
       template <int dim>
       std::vector<std::vector<double>>
-                                    Interface<dim>::properties_at_points(const ParticleHandler<dim> &particle_handler,
-                                                                         const std::vector<Point<dim>> &positions,
-                                                                         const typename parallel::distributed::Triangulation<dim>::active_cell_iterator &cell) const
+      Interface<dim>::properties_at_points(const ParticleHandler<dim> &particle_handler,
+                                           const std::vector<Point<dim>> &positions,
+                                           const typename parallel::distributed::Triangulation<dim>::active_cell_iterator &cell) const
       {
         return properties_at_points(particle_handler,positions,ComponentMask(), cell);
       }
@@ -149,10 +149,10 @@ namespace aspect
     {
       template <>
       std::list<internal::Plugins::PluginList<Particle::Interpolator::Interface<2>>::PluginInfo> *
-                                                                                 internal::Plugins::PluginList<Particle::Interpolator::Interface<2>>::plugins = nullptr;
+      internal::Plugins::PluginList<Particle::Interpolator::Interface<2>>::plugins = nullptr;
       template <>
       std::list<internal::Plugins::PluginList<Particle::Interpolator::Interface<3>>::PluginInfo> *
-                                                                                 internal::Plugins::PluginList<Particle::Interpolator::Interface<3>>::plugins = nullptr;
+      internal::Plugins::PluginList<Particle::Interpolator::Interface<3>>::plugins = nullptr;
     }
   }
 
