@@ -97,11 +97,6 @@ namespace aspect
          */
         bool is_compressible () const override;
 
-        /**
-         * Method to calculate reference viscosity.
-         */
-        double reference_viscosity () const override;
-
         void
         create_additional_named_outputs (MaterialModel::MaterialModelOutputs<dim> &out) const override;
 
@@ -393,14 +388,6 @@ namespace aspect
     is_compressible () const
     {
       return base_model->is_compressible();
-    }
-
-    template <int dim>
-    double
-    PrescribedDilation<dim>::
-    reference_viscosity() const
-    {
-      return true;
     }
 
     template <int dim>
