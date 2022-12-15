@@ -85,6 +85,13 @@ namespace aspect
         assemblers.stokes_system.push_back(
           std::make_unique<aspect::Assemblers::NewtonStokesIsentropicCompressionTerm<dim>>());
       }
+    else if (this->get_parameters().formulation_mass_conservation ==
+             Parameters<dim>::Formulation::MassConservation::projected_density_field)
+      {
+        CitationInfo::add("pda");
+        assemblers.stokes_system.push_back(
+          std::make_unique<aspect::Assemblers::NewtonStokesProjectedDensityFieldTerm<dim>>());
+      }
     else
       AssertThrow(false,
                   ExcMessage("Unknown mass conservation equation approximation. There is no assembler"
@@ -179,7 +186,7 @@ namespace aspect
                              "(1.0-(residual/switch\\_initial\\_residual)))$, where switch\\_initial\\_residual is the "
                              "residual at the time when the Newton solver is switched on.");
 
-          prm.declare_entry ("Maximum linear Stokes solver tolerance", "0.9",
+          prm.declare_entry ("Maximum linear Stokes solver tolerance", "1e-2",
                              Patterns::Double (0., 1.),
                              "The linear Stokes solver tolerance is dynamically chosen for the Newton solver, based "
                              "on the Eisenstat Walker (1994) paper (https://doi.org/10.1137/0917003), equation 2.2. "

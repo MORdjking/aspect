@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2017 - 2021 by the authors of the ASPECT code.
+  Copyright (C) 2017 - 2022 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -245,7 +245,7 @@ namespace aspect
       // create the base model and initialize its SimulatorAccess base
       // class; it will get a chance to read its parameters below after we
       // leave the current section
-      base_model.reset(create_material_model<dim>("simple compressible"));
+      base_model = create_material_model<dim>("simple compressible");
       if (SimulatorAccess<dim> *sim = dynamic_cast<SimulatorAccess<dim>*>(base_model.get()))
         sim->initialize_simulator (this->get_simulator());
       base_model->parse_parameters(prm);

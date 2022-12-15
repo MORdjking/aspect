@@ -205,12 +205,12 @@ namespace aspect
                        const SymmetricTensor<2,dim> &strain_rate,
                        const Tensor<1,dim>          &/*velocity*/,
                        const Point<dim>             &position,
-                       const unsigned int            field_index,
+                       const unsigned int            grain_size_index,
                        const int                     crossed_transition) const
     {
       // we want to iterate over the grain size evolution here, as we solve in fact an ordinary differential equation
       // and it is not correct to use the starting grain size (and introduces instabilities)
-      const double original_grain_size = compositional_fields[field_index];
+      const double original_grain_size = compositional_fields[grain_size_index];
       if ((original_grain_size != original_grain_size) || this->get_timestep() == 0.0
           || original_grain_size < std::numeric_limits<double>::min())
         return 0.0;
@@ -298,7 +298,7 @@ namespace aspect
             }
 
           grain_size += grain_size_change;
-          current_composition[field_index] = grain_size;
+          current_composition[grain_size_index] = grain_size;
 
           Assert(grain_size > 0,
                  ExcMessage("The grain size became smaller than zero. This is not valid, "
@@ -314,7 +314,7 @@ namespace aspect
       // TODO: recrystallize first, and then do grain size growth/reduction for grains that crossed the transition
       // in dependence of the distance they have moved
       double phase_grain_size_reduction = 0.0;
-      if (this->introspection().name_for_compositional_index(field_index) == "grain_size"
+      if (this->introspection().name_for_compositional_index(grain_size_index) == "grain_size"
           &&
           this->get_timestep_number() > 0)
         {
@@ -839,7 +839,9 @@ namespace aspect
             {
               double effective_viscosity;
               double disl_viscosity = std::numeric_limits<double>::max();
-
+              Assert(std::isfinite(in.strain_rate[i].norm()),
+                     ExcMessage("Invalid strain_rate in the MaterialModelInputs. This is likely because it was "
+                                "not filled by the caller."));
               const SymmetricTensor<2,dim> shear_strain_rate = in.strain_rate[i] - 1./dim * trace(in.strain_rate[i]) * unit_symmetric_tensor<dim>();
               const double second_strain_rate_invariant = std::sqrt(std::max(-second_invariant(shear_strain_rate), 0.));
 
@@ -1031,21 +1033,25 @@ namespace aspect
           prm.declare_entry ("Grain growth activation energy", "3.5e5",
                              Patterns::List (Patterns::Double (0.)),
                              "The activation energy for grain growth $E_g$. "
+                             "List must have one more entry than the Phase transition depths. "
                              "Units: \\si{\\joule\\per\\mole}.");
           prm.declare_entry ("Grain growth activation volume", "8e-6",
                              Patterns::List (Patterns::Double (0.)),
                              "The activation volume for grain growth $V_g$. "
+                             "List must have one more entry than the Phase transition depths. "
                              "Units: \\si{\\meter\\cubed\\per\\mole}.");
           prm.declare_entry ("Grain growth exponent", "3.",
                              Patterns::List (Patterns::Double (0.)),
                              "The exponent of the grain growth law $p_g$. This is an experimentally determined "
                              "grain growth constant. "
+                             "List must have one more entry than the Phase transition depths. "
                              "Units: none.");
           prm.declare_entry ("Grain growth rate constant", "1.5e-5",
                              Patterns::List (Patterns::Double (0.)),
                              "The prefactor for the Ostwald ripening grain growth law $G_0$. "
                              "This is dependent on water content, which is assumed to be "
                              "50 H/$10^6$ Si for the default value. "
+                             "List must have one more entry than the Phase transition depths. "
                              "Units: \\si{\\meter}$^{p_g}$\\si{\\per\\second}.");
           prm.declare_entry ("Minimum grain size", "5e-6",
                              Patterns::Double (0.),
@@ -1056,11 +1062,13 @@ namespace aspect
           prm.declare_entry ("Reciprocal required strain", "10.",
                              Patterns::List (Patterns::Double (0.)),
                              "This parameter ($\\lambda$) gives an estimate of the strain necessary "
-                             "to achieve a new grain size. ");
+                             "to achieve a new grain size. "
+                             "List must have one more entry than the Phase transition depths.");
           prm.declare_entry ("Recrystallized grain size", "",
                              Patterns::List (Patterns::Double (0.)),
                              "The grain size $d_{ph}$ to that a phase will be reduced to when crossing a phase transition. "
                              "When set to zero, grain size will not be reduced. "
+                             "List must have the same number of entries as Phase transition depths. "
                              "Units: \\si{\\meter}.");
           prm.declare_entry ("Use paleowattmeter", "true",
                              Patterns::Bool (),
@@ -1071,14 +1079,17 @@ namespace aspect
           prm.declare_entry ("Average specific grain boundary energy", "1.0",
                              Patterns::List (Patterns::Double (0.)),
                              "The average specific grain boundary energy $\\gamma$. "
+                             "List must have one more entry than the Phase transition depths. "
                              "Units: \\si{\\joule\\per\\meter\\squared}.");
           prm.declare_entry ("Work fraction for boundary area change", "0.1",
                              Patterns::List (Patterns::Double (0.)),
                              "The fraction $\\chi$ of work done by dislocation creep to change the grain boundary area. "
+                             "List must have one more entry than the Phase transition depths. "
                              "Units: \\si{\\joule\\per\\meter\\squared}.");
           prm.declare_entry ("Geometric constant", "3.",
                              Patterns::List (Patterns::Double (0.)),
                              "The geometric constant $c$ used in the paleowattmeter grain size reduction law. "
+                             "List must have one more entry than the Phase transition depths. "
                              "Units: none.");
           prm.declare_entry ("Dislocation viscosity iteration threshold", "1e-3",
                              Patterns::Double (0.),
@@ -1098,39 +1109,48 @@ namespace aspect
           prm.declare_entry ("Dislocation creep exponent", "3.5",
                              Patterns::List (Patterns::Double (0.)),
                              "The power-law exponent $n_{dis}$ for dislocation creep. "
+                             "List must have one more entry than the Phase transition depths. "
                              "Units: none.");
           prm.declare_entry ("Dislocation activation energy", "4.8e5",
                              Patterns::List (Patterns::Double (0.)),
                              "The activation energy for dislocation creep $E_{dis}$. "
+                             "List must have one more entry than the Phase transition depths. "
                              "Units: \\si{\\joule\\per\\mole}.");
           prm.declare_entry ("Dislocation activation volume", "1.1e-5",
                              Patterns::List (Patterns::Double (0.)),
                              "The activation volume for dislocation creep $V_{dis}$. "
+                             "List must have one more entry than the Phase transition depths. "
                              "Units: \\si{\\meter\\cubed\\per\\mole}.");
           prm.declare_entry ("Dislocation creep prefactor", "4.5e-15",
                              Patterns::List (Patterns::Double (0.)),
                              "The prefactor for the dislocation creep law $A_{dis}$. "
+                             "List must have one more entry than the Phase transition depths. "
                              "Units: \\si{\\pascal}$^{-n_{dis}}$\\si{\\per\\second}.");
           prm.declare_entry ("Diffusion creep exponent", "1.",
                              Patterns::List (Patterns::Double (0.)),
                              "The power-law exponent $n_{diff}$ for diffusion creep. "
+                             "List must have one more entry than the Phase transition depths. "
                              "Units: none.");
           prm.declare_entry ("Diffusion activation energy", "3.35e5",
                              Patterns::List (Patterns::Double (0.)),
                              "The activation energy for diffusion creep $E_{diff}$. "
+                             "List must have one more entry than the Phase transition depths. "
                              "Units: \\si{\\joule\\per\\mole}.");
           prm.declare_entry ("Diffusion activation volume", "4e-6",
                              Patterns::List (Patterns::Double (0.)),
                              "The activation volume for diffusion creep $V_{diff}$. "
+                             "List must have one more entry than the Phase transition depths. "
                              "Units: \\si{\\meter\\cubed\\per\\mole}.");
           prm.declare_entry ("Diffusion creep prefactor", "7.4e-15",
                              Patterns::List (Patterns::Double (0.)),
                              "The prefactor for the diffusion creep law $A_{diff}$. "
+                             "List must have one more entry than the Phase transition depths. "
                              "Units: \\si{\\meter}$^{p_{diff}}$\\si{\\pascal}$^{-n_{diff}}$\\si{\\per\\second}.");
           prm.declare_entry ("Diffusion creep grain size exponent", "3.",
                              Patterns::List (Patterns::Double (0.)),
                              "The diffusion creep grain size exponent $p_{diff}$ that determines the "
                              "dependence of viscosity on grain size. "
+                             "List must have one more entry than the Phase transition depths. "
                              "Units: none.");
           prm.declare_entry ("Maximum temperature dependence of viscosity", "100.",
                              Patterns::Double (0.),

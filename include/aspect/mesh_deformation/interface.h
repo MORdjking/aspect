@@ -260,7 +260,7 @@ namespace aspect
         (const std::string &name,
          const std::string &description,
          void (*declare_parameters_function) (ParameterHandler &),
-         Interface<dim> *(*factory_function) ());
+         std::unique_ptr<Interface<dim>> (*factory_function) ());
 
         /**
          * Return a map of boundary indicators to the names of all mesh deformation models currently
@@ -321,11 +321,17 @@ namespace aspect
         get_initial_topography () const;
 
         /**
-         * Return the mesh displacements stored on
-         * the mesh deformation element.
+         * Return the mesh displacements based on the mesh deformation
+         * DoFHandler you can access with get_mesh_deformation_dof_handler().
          */
         const LinearAlgebra::Vector &
         get_mesh_displacements () const;
+
+        /**
+         * Return the DoFHandler used to represent the mesh deformation space.
+         */
+        const DoFHandler<dim> &
+        get_mesh_deformation_dof_handler () const;
 
         /**
          * Go through the list of all mesh deformation objects that have been selected
@@ -411,9 +417,9 @@ namespace aspect
         void compute_mesh_displacements ();
 
         /**
-        * Solve vector Laplacian equation using GMG for internal mesh displacements and update
-        * the current displacement vector based on the solution.
-        */
+         * Solve vector Laplacian equation using GMG for internal mesh displacements and update
+         * the current displacement vector based on the solution.
+         */
         void compute_mesh_displacements_gmg ();
 
         /**
@@ -588,14 +594,14 @@ namespace aspect
         MGLevelObject<dealii::LinearAlgebra::distributed::Vector<double>> level_displacements;
 
         /**
-        * Multigrid transfer operator for the displacements
-        */
+         * Multigrid transfer operator for the displacements
+         */
         MGTransferMatrixFree<dim, double> mg_transfer;
 
 
         /**
-        * Multigrid level constraints for the displacements
-        */
+         * Multigrid level constraints for the displacements
+         */
         MGConstrainedDoFs mg_constrained_dofs;
 
         friend class Simulator<dim>;

@@ -246,7 +246,7 @@ namespace aspect
     Manager<dim>::register_time_stepping_model(const std::string &name,
                                                const std::string &description,
                                                void (*declare_parameters_function) (ParameterHandler &),
-                                               Interface<dim> *(*factory_function) ())
+                                               std::unique_ptr<Interface<dim>> (*factory_function) ())
     {
       std::get<dim>(registered_plugins).register_plugin (name,
                                                          description,
@@ -342,11 +342,11 @@ namespace aspect
 
         prm.leave_subsection();
 
-        for (unsigned int name=0; name<model_names.size(); ++name)
+        for (const auto &model_name : model_names)
           {
             active_plugins.push_back (std::unique_ptr<Interface<dim>>
                                       (std::get<dim>(registered_plugins)
-                                       .create_plugin (model_names[name],
+                                       .create_plugin (model_name,
                                                        "Time stepping::Model names")));
 
             if (SimulatorAccess<dim> *sim = dynamic_cast<SimulatorAccess<dim>*>(&*active_plugins.back()))

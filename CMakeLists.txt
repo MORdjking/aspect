@@ -69,6 +69,7 @@ ENDFOREACH()
 INCLUDE_DIRECTORIES(BEFORE ${CMAKE_BINARY_DIR}/include include)
 INCLUDE_DIRECTORIES(AFTER  contrib/catch)
 
+# Generate compile_commands.json for tooling (VS Code, etc.)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 LIST(APPEND CMAKE_MODULE_PATH
@@ -139,19 +140,35 @@ if(ASPECT_WITH_WORLD_BUILDER)
   MESSAGE(STATUS "Using World Builder version ${WORLD_BUILDER_VERSION} found at ${WORLD_BUILDER_SOURCE_DIR}.")
 
   # add source and include dirs:
-  FILE(GLOB_RECURSE wb_files "${WORLD_BUILDER_SOURCE_DIR}/source/*.cc")
+  IF(WORLD_BUILDER_VERSION VERSION_LESS 0.5.0)
+    FILE(GLOB_RECURSE wb_files "${WORLD_BUILDER_SOURCE_DIR}/source/*.cc")
+  ELSE()
+    FILE(GLOB_RECURSE wb_files "${WORLD_BUILDER_SOURCE_DIR}/source/world_builder/*.cc")
+  ENDIF()
   LIST(APPEND TARGET_SRC ${wb_files})
 
   # generate config.cc and include it:
-  CONFIGURE_FILE("${WORLD_BUILDER_SOURCE_DIR}/source/config.cc.in" "${CMAKE_BINARY_DIR}/world_builder_config.cc" @ONLY)
-  LIST(INSERT TARGET_SRC 0 "${CMAKE_BINARY_DIR}/world_builder_config.cc")
+  IF(WORLD_BUILDER_VERSION VERSION_LESS 0.5.0)
+    CONFIGURE_FILE("${WORLD_BUILDER_SOURCE_DIR}/source/config.cc.in" "${CMAKE_BINARY_DIR}/source/world_builder/config.cc" @ONLY)
+    LIST(INSERT TARGET_SRC 0 "${CMAKE_BINARY_DIR}/source/world_builder/config.cc")
+    FILE(REMOVE "${CMAKE_BINARY_DIR}/include/world_builder/config.h")
+  ELSE()
+    CONFIGURE_FILE("${WORLD_BUILDER_SOURCE_DIR}/include/world_builder/config.h.in" "${CMAKE_BINARY_DIR}/include/world_builder/config.h" @ONLY)
+    INCLUDE_DIRECTORIES("${CMAKE_BINARY_DIR}/include/")
+    FILE(REMOVE "${CMAKE_BINARY_DIR}/source/world_builder/config.cc")
+  ENDIF()
 
   # Move some file to the end for unity builds to make sure other file come
   # "before". Note: The current design keeps all ASPECT files (including
   # ASPECT_UNITY_LAST files) before all GWB files. Mixing them will causes
   # many issues with non-unique namespace names like Utilities.
-  SET(UNITY_WB_LAST_FILES
-  "${WORLD_BUILDER_SOURCE_DIR}/source/parameters.cc")
+  IF(WORLD_BUILDER_VERSION VERSION_LESS 0.5.0)
+    SET(UNITY_WB_LAST_FILES
+    "${WORLD_BUILDER_SOURCE_DIR}/source/parameters.cc")
+  ELSE()
+    SET(UNITY_WB_LAST_FILES
+    "${WORLD_BUILDER_SOURCE_DIR}/source/world_builder/parameters.cc")
+  ENDIF()
 
   FOREACH(_source_file ${UNITY_WB_LAST_FILES})
     LIST(FIND TARGET_SRC ${_source_file} _index)

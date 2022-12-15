@@ -106,6 +106,7 @@ namespace aspect
                                                           this->introspection(),
                                                           this->get_solution(),
                                                           false);
+              scratch.face_material_model_inputs.requested_properties = MaterialModel::MaterialProperties::density;
 
               this->get_material_model().evaluate(scratch.face_material_model_inputs, scratch.face_material_model_outputs);
 
@@ -303,7 +304,7 @@ namespace aspect
     MeshDeformationHandler<dim>::register_mesh_deformation (const std::string &name,
                                                             const std::string &description,
                                                             void (*declare_parameters_function) (ParameterHandler &),
-                                                            Interface<dim> *(*factory_function) ())
+                                                            std::unique_ptr<Interface<dim>> (*factory_function) ())
     {
       std::get<dim>(registered_plugins).register_plugin (name,
                                                          description,
@@ -1024,19 +1025,6 @@ namespace aspect
       mg_constrained_dofs.make_zero_boundary_constraints(mesh_deformation_dof_handler,
                                                          zero_mesh_deformation_boundary_indicators);
 
-      {
-        // Handle no normal flux, copied from GMG Stokes solver.
-        const std::set<types::boundary_id> no_flux_boundary = sim.boundary_velocity_manager.get_tangential_boundary_velocity_indicators();
-        if (!no_flux_boundary.empty() && !sim.geometry_model->has_curved_elements())
-          for (const auto bid : no_flux_boundary)
-            {
-              internal::TangentialBoundaryFunctions::compute_no_normal_flux_constraints_box(mesh_deformation_dof_handler,
-                                                                                            bid,
-                                                                                            0 /*first_vector_component*/,
-                                                                                            mg_constrained_dofs);
-            }
-      }
-
       mg_matrices.clear_elements();
       mg_matrices.resize(0, n_levels-1);
 
@@ -1055,18 +1043,21 @@ namespace aspect
 
           std::set<types::boundary_id> no_flux_boundary
             = sim.boundary_velocity_manager.get_tangential_boundary_velocity_indicators();
-          if (!no_flux_boundary.empty() && sim.geometry_model->has_curved_elements())
+          if (!no_flux_boundary.empty())
             {
               AffineConstraints<double> user_level_constraints;
               user_level_constraints.reinit(relevant_dofs);
+              const IndexSet &refinement_edge_indices =
+                mg_constrained_dofs.get_refinement_edge_indices(level);
+              dealii::VectorTools::compute_no_normal_flux_constraints_on_level(
+                mesh_deformation_dof_handler,
+                0,
+                no_flux_boundary,
+                user_level_constraints,
+                mapping,
+                refinement_edge_indices,
+                level);
 
-              internal::TangentialBoundaryFunctions::compute_no_normal_flux_constraints_shell(mesh_deformation_dof_handler,
-                                                                                              mg_constrained_dofs,
-                                                                                              mapping,
-                                                                                              level,
-                                                                                              0,
-                                                                                              no_flux_boundary,
-                                                                                              user_level_constraints);
               user_level_constraints.close();
               mg_constrained_dofs.add_user_constraints(level,user_level_constraints);
 
@@ -1320,6 +1311,12 @@ namespace aspect
 
       mesh_deformation_dof_handler.distribute_dofs(mesh_deformation_fe);
 
+      // Renumber the DoFs hierarchical so that we get the
+      // same numbering if we resume the computation. This
+      // is because the numbering depends on the order the
+      // cells are created.
+      DoFRenumbering::hierarchical (mesh_deformation_dof_handler);
+
       if (this->is_stokes_matrix_free())
         {
           mesh_deformation_dof_handler.distribute_mg_dofs();
@@ -1364,12 +1361,6 @@ namespace aspect
       this->get_pcout() << "Number of mesh deformation degrees of freedom: "
                         << mesh_deformation_dof_handler.n_dofs()
                         << std::endl;
-
-      // Renumber the DoFs hierarchical so that we get the
-      // same numbering if we resume the computation. This
-      // is because the numbering depends on the order the
-      // cells are created.
-      DoFRenumbering::hierarchical (mesh_deformation_dof_handler);
 
       mesh_locally_owned = mesh_deformation_dof_handler.locally_owned_dofs();
       DoFTools::extract_locally_relevant_dofs (mesh_deformation_dof_handler,
@@ -1500,6 +1491,15 @@ namespace aspect
     MeshDeformationHandler<dim>::get_mesh_displacements () const
     {
       return mesh_displacements;
+    }
+
+
+
+    template <int dim>
+    const DoFHandler<dim> &
+    MeshDeformationHandler<dim>::get_mesh_deformation_dof_handler () const
+    {
+      return mesh_deformation_dof_handler;
     }
 
 

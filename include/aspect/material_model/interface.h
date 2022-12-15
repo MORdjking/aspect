@@ -26,14 +26,7 @@
 #include <aspect/material_model/utilities.h>
 
 #include <deal.II/base/point.h>
-
-// Work around an incorrect instantiation in qprojector.h of deal.II 9.2.0,
-// which requires including qprojector.h before quadrature.h (and not
-// after). This file doesn't actually need qprojector.h, so the include can be
-// removed when we require 9.3.. For more info see
-// https://github.com/geodynamics/aspect/issues/3728
 #include <deal.II/base/quadrature.h>
-
 #include <deal.II/base/symmetric_tensor.h>
 #include <deal.II/base/parameter_handler.h>
 #include <deal.II/dofs/dof_handler.h>
@@ -175,9 +168,9 @@ namespace aspect
     }
 
     /**
-    * A namespace whose enum members are used in querying which material
-    * properties should be computed.
-    */
+     * A namespace whose enum members are used in querying which material
+     * properties should be computed.
+     */
     namespace MaterialProperties
     {
       /**
@@ -257,7 +250,7 @@ namespace aspect
        * @param n_comp The number of vector quantities (in the order in which
        * the Introspection class reports them) for which input will be
        * provided.
-      */
+       */
       MaterialModelInputs(const unsigned int n_points,
                           const unsigned int n_comp);
 
@@ -324,7 +317,7 @@ namespace aspect
       /**
        * Move constructor. This constructor simply moves all members.
        */
-      MaterialModelInputs (MaterialModelInputs &&) = default;
+      MaterialModelInputs (MaterialModelInputs &&)  noexcept = default;
 
       /**
        * Copy operator. Copying these objects is expensive and
@@ -507,7 +500,7 @@ namespace aspect
       /**
        * Move constructor. This constructor simply moves all members.
        */
-      MaterialModelOutputs (MaterialModelOutputs &&) = default;
+      MaterialModelOutputs (MaterialModelOutputs &&)  noexcept = default;
 
       /**
        * Copy operator. Copying these objects is expensive, and consequently
@@ -518,12 +511,12 @@ namespace aspect
       /**
        * Move operator.
        */
-      MaterialModelOutputs &operator= (MaterialModelOutputs &&) = default;
+      MaterialModelOutputs &operator= (MaterialModelOutputs &&)  noexcept = default;
 
       /**
-      * Function that returns the number of points at which
-      * the material model is to be evaluated.
-      */
+       * Function that returns the number of points at which
+       * the material model is to be evaluated.
+       */
       unsigned int n_evaluation_points() const;
 
       /**
@@ -1078,7 +1071,7 @@ namespace aspect
         {}
 
         ~AdditionalMaterialOutputsStokesRHS() override
-        {}
+          = default;
 
         void average (const MaterialAveraging::AveragingOperation /*operation*/,
                       const FullMatrix<double>  &/*projection_matrix*/,
@@ -1162,7 +1155,7 @@ namespace aspect
         {}
 
         ~ElasticOutputs() override
-        {}
+          = default;
 
         void average (const MaterialAveraging::AveragingOperation operation,
                       const FullMatrix<double>  &/*projection_matrix*/,
@@ -1183,15 +1176,15 @@ namespace aspect
 
 
     /**
-    * Additional output fields for the enthalpy change upon melting or
-    * freezing to be added to the MaterialModel::MaterialModelOutputs
-    * structure and filled in the MaterialModel::Interface::evaluate()
-    * function.
-    * These outputs are needed in heating models that compute the latent
-    * heat of melting/freezing based on the material properties in the
-    * material models (which is required for thermodynamically consistent
-    * models).
-    */
+     * Additional output fields for the enthalpy change upon melting or
+     * freezing to be added to the MaterialModel::MaterialModelOutputs
+     * structure and filled in the MaterialModel::Interface::evaluate()
+     * function.
+     * These outputs are needed in heating models that compute the latent
+     * heat of melting/freezing based on the material properties in the
+     * material models (which is required for thermodynamically consistent
+     * models).
+     */
     template <int dim>
     class EnthalpyOutputs : public AdditionalMaterialOutputs<dim>
     {
@@ -1201,7 +1194,7 @@ namespace aspect
         {}
 
         virtual ~EnthalpyOutputs()
-        {}
+          = default;
 
         virtual void average (const MaterialAveraging::AveragingOperation operation,
                               const FullMatrix<double>  &/*projection_matrix*/,
@@ -1306,8 +1299,7 @@ namespace aspect
 
         /**
          * Function to compute the material properties in @p out given the
-         * inputs in @p in. If MaterialModelInputs.strain_rate has the length
-         * 0, then the viscosity does not need to be computed.
+         * inputs in @p in.
          */
         virtual
         void evaluate (const MaterialModel::MaterialModelInputs<dim> &in,
@@ -1343,7 +1335,7 @@ namespace aspect
          * If this material model can produce additional named outputs
          * that are derived from NamedAdditionalOutputs, create them in here.
          * By default, this does nothing.
-          */
+         */
         virtual
         void
         create_additional_named_outputs (MaterialModelOutputs &outputs) const;
@@ -1402,7 +1394,7 @@ namespace aspect
     register_material_model (const std::string &name,
                              const std::string &description,
                              void (*declare_parameters_function) (ParameterHandler &),
-                             Interface<dim> *(*factory_function) ());
+                             std::unique_ptr<Interface<dim>> (*factory_function) ());
 
     /**
      * A function that given the name of a model returns a pointer to an
@@ -1415,7 +1407,7 @@ namespace aspect
      * @ingroup MaterialModels
      */
     template <int dim>
-    Interface<dim> *
+    std::unique_ptr<Interface<dim>>
     create_material_model (const std::string &model_name);
 
 
@@ -1431,7 +1423,7 @@ namespace aspect
      * @ingroup MaterialModels
      */
     template <int dim>
-    Interface<dim> *
+    std::unique_ptr<Interface<dim>>
     create_material_model (ParameterHandler &prm);
 
 

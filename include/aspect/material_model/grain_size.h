@@ -343,7 +343,7 @@ namespace aspect
                            const SymmetricTensor<2,dim> &strain_rate,
                            const Tensor<1,dim>          &velocity,
                            const Point<dim>             &position,
-                           const unsigned int            phase_index,
+                           const unsigned int            grain_size_index,
                            const int                     crossed_transition) const;
 
         /**
@@ -419,11 +419,11 @@ namespace aspect
         std::vector<std::unique_ptr<MaterialModel::MaterialUtilities::Lookup::MaterialLookup>> material_lookup;
 
         /**
-        * We cache the evaluators that are necessary to evaluate the temperature
-        * and pressure at the vertices of the current cell.
-        * By caching the evaluators, we can avoid recreating them
-        * every time we need them.
-        */
+         * We cache the evaluators that are necessary to evaluate the temperature
+         * and pressure at the vertices of the current cell.
+         * By caching the evaluators, we can avoid recreating them
+         * every time we need them.
+         */
         mutable std::unique_ptr<FEPointEvaluation<1, dim>> temperature_evaluator;
         mutable std::unique_ptr<FEPointEvaluation<1, dim>> pressure_evaluator;
     };

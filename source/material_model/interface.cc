@@ -119,7 +119,7 @@ namespace aspect
     register_material_model (const std::string &name,
                              const std::string &description,
                              void (*declare_parameters_function) (ParameterHandler &),
-                             Interface<dim> *(*factory_function) ())
+                             std::unique_ptr<Interface<dim>> (*factory_function) ())
     {
       std::get<dim>(registered_plugins).register_plugin (name,
                                                          description,
@@ -129,18 +129,16 @@ namespace aspect
 
 
     template <int dim>
-    Interface<dim> *
+    std::unique_ptr<Interface<dim>>
     create_material_model (const std::string &model_name)
     {
-      Interface<dim> *plugin = std::get<dim>(registered_plugins).create_plugin (model_name,
-                                                                                "Material model::Model name");
-      return plugin;
+      return std::get<dim>(registered_plugins).create_plugin (model_name, "Material model::Model name");
     }
 
 
 
     template <int dim>
-    Interface<dim> *
+    std::unique_ptr<Interface<dim>>
     create_material_model (ParameterHandler &prm)
     {
       std::string model_name;
@@ -284,7 +282,6 @@ namespace aspect
     {
       if (compute_strain_rate == false)
         {
-          this->strain_rate.resize(0);
           requested_properties = MaterialProperties::Property(requested_properties & ~MaterialProperties::viscosity);
         }
 
@@ -369,9 +366,7 @@ namespace aspect
       fe_values[introspection.extractors.pressure].get_function_gradients (solution_vector, this->pressure_gradient);
 
       // Only the viscosity in the material can depend on the strain_rate
-      // if this is not needed, we can save some time here. By setting the
-      // length of the strain_rate vector to 0, we signal to evaluate()
-      // that we do not need to access the viscosity.
+      // if this is not needed, we can save some time here.
       if (compute_strain_rate)
         {
           fe_values[introspection.extractors.velocities].get_function_symmetric_gradients (solution_vector,this->strain_rate);
@@ -379,7 +374,6 @@ namespace aspect
         }
       else
         {
-          this->strain_rate.resize(0);
           requested_properties = MaterialProperties::Property(requested_properties & ~MaterialProperties::viscosity);
         }
 
@@ -899,7 +893,7 @@ namespace aspect
     template <int dim>
     NamedAdditionalMaterialOutputs<dim>::
     ~NamedAdditionalMaterialOutputs()
-    {}
+      = default;
 
 
 
@@ -1134,7 +1128,7 @@ namespace aspect
   register_material_model<dim> (const std::string &, \
                                 const std::string &, \
                                 void ( *) (ParameterHandler &), \
-                                Interface<dim> *( *) ()); \
+                                std::unique_ptr<Interface<dim>>( *) ()); \
   \
   template \
   std::string \
@@ -1145,7 +1139,7 @@ namespace aspect
   declare_parameters<dim> (ParameterHandler &); \
   \
   template \
-  Interface<dim> * \
+  std::unique_ptr<Interface<dim>> \
   create_material_model<dim> (const std::string &model_name); \
   \
   template \
@@ -1153,7 +1147,7 @@ namespace aspect
   write_plugin_graph<dim> (std::ostream &); \
   \
   template \
-  Interface<dim> * \
+  std::unique_ptr<Interface<dim>> \
   create_material_model<dim> (ParameterHandler &prm); \
   \
   template struct MaterialModelInputs<dim>; \

@@ -203,9 +203,9 @@ namespace aspect
         bool should_repeat_time_step() const;
 
         /**
-          * If true, execute a mesh refinement step now (potentially before repeating
-          * the current time step).
-          */
+         * If true, execute a mesh refinement step now (potentially before repeating
+         * the current time step).
+         */
         bool should_refine_mesh() const;
 
         /**
@@ -271,7 +271,7 @@ namespace aspect
         register_time_stepping_model (const std::string &name,
                                       const std::string &description,
                                       void (*declare_parameters_function) (ParameterHandler &),
-                                      Interface<dim> *(*factory_function) ());
+                                      std::unique_ptr<Interface<dim>> (*factory_function) ());
 
       private:
 

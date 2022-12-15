@@ -1670,14 +1670,10 @@ namespace aspect
         assert(n_l >= 0);
         m_upper.resize(n_u+1);
         m_lower.resize(n_l+1);
-        for (size_t i=0; i<m_upper.size(); i++)
-          {
-            m_upper[i].resize(dim);
-          }
-        for (size_t i=0; i<m_lower.size(); i++)
-          {
-            m_lower[i].resize(dim);
-          }
+        for (auto &x : m_upper)
+          x.resize(dim);
+        for (auto &x : m_lower)
+          x.resize(dim);
       }
 
 
@@ -2329,7 +2325,7 @@ namespace aspect
       if ((strain_rate.norm() == 0) || (dviscosities_dstrain_rate.norm() == 0))
         return 1;
 
-      const double norm_a_b = std::sqrt((strain_rate*strain_rate)*(dviscosities_dstrain_rate*dviscosities_dstrain_rate));;//std::sqrt((deviator(strain_rate)*deviator(strain_rate))*(dviscosities_dstrain_rate*dviscosities_dstrain_rate));
+      const double norm_a_b = std::sqrt((strain_rate*strain_rate)*(dviscosities_dstrain_rate*dviscosities_dstrain_rate));//std::sqrt((deviator(strain_rate)*deviator(strain_rate))*(dviscosities_dstrain_rate*dviscosities_dstrain_rate));
       const double contract_b_a = (dviscosities_dstrain_rate*strain_rate);
       const double one_minus_part = 1 - (contract_b_a / norm_a_b);
       const double denom = one_minus_part * one_minus_part * norm_a_b;

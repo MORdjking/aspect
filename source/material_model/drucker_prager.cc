@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2015 - 2021 by the authors of the ASPECT code.
+  Copyright (C) 2015 - 2022 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -50,6 +50,9 @@ namespace aspect
           // calculate effective viscosity
           if (in.requests_property(MaterialProperties::viscosity))
             {
+              Assert(std::isfinite(in.strain_rate[i].norm()),
+                     ExcMessage("Invalid strain_rate in the MaterialModelInputs. This is likely because it was "
+                                "not filled by the caller."));
               const SymmetricTensor<2,dim> strain_rate_deviator = deviator(in.strain_rate[i]);
 
               // For the very first time this function is called

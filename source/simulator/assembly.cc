@@ -524,14 +524,20 @@ namespace aspect
       data.local_pressure_shape_function_integrals = 0;
 
     // initialize the material model data on the cell
-    const bool update_strain_rate =
+    const bool need_viscosity =
       assemble_newton_stokes_system || this->parameters.enable_prescribed_dilation || rebuild_stokes_matrix;
 
     scratch.material_model_inputs.reinit  (scratch.finite_element_values,
                                            cell,
                                            this->introspection,
                                            current_linearization_point,
-                                           update_strain_rate);
+                                           need_viscosity);
+    scratch.material_model_inputs.requested_properties
+      =
+        MaterialModel::MaterialProperties::equation_of_state_properties |
+        MaterialModel::MaterialProperties::additional_outputs
+        |
+        (need_viscosity ? MaterialModel::MaterialProperties::viscosity : MaterialModel::MaterialProperties::uninitialized);
 
     for (unsigned int i=0; i<assemblers->stokes_system.size(); ++i)
       assemblers->stokes_system[i]->create_additional_material_model_outputs(scratch.material_model_outputs);
@@ -1128,7 +1134,7 @@ namespace aspect
                                            !assemblers->advection_system_on_interior_face.empty()) &&
                                           assemblers->advection_system_assembler_on_face_properties[advection_field.field_index()].need_face_finite_element_evaluation;
     const bool allocate_neighbor_contributions = !assemblers->advection_system_on_interior_face.empty() &&
-                                                 assemblers->advection_system_assembler_on_face_properties[advection_field.field_index()].need_face_finite_element_evaluation;;
+                                                 assemblers->advection_system_assembler_on_face_properties[advection_field.field_index()].need_face_finite_element_evaluation;
 
     const bool use_supg = (parameters.advection_stabilization_method
                            == Parameters<dim>::AdvectionStabilizationMethod::supg);
